@@ -219,3 +219,234 @@ async function manageCart() {
 }
 
 manageCart()
+
+const formContact = document.querySelector('form.cart__order__form')
+
+const nameRegex = /([A-Z]{1}[a-zéèàç]+){1}([\S\-\1])*$/
+
+const adressRegex = /([0-9]{1,4})\ {1}([^\t\n\r][a-zéèàçùA-Z0-9\s\-\,\.]*)$/
+
+const cityRegex = /([0-9]{5}){1}\s([A-Z]{1}[a-zéèàç]+){1}([\S\-\2])*$/
+
+const emailRegex = /([a-z]+[0-9]*[a-z0-9.\-_]+)+@([a-z]{1,}).([a-z]{1,})$/i
+
+const emailRegex2 = /(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\[(?:(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9]))\.){3}(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9])|[a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])/
+
+function isValidAlphabetical(inputValue) {
+  return nameRegex.test(inputValue)
+}
+
+function isValidAddress(inputValue) {
+  return adressRegex.test(inputValue)
+}
+
+function isValidCity(inputValue) {
+  return cityRegex.test(inputValue)
+}
+
+function isValidEmail(inputValue) {
+  return emailRegex2.test(inputValue)
+}
+
+function verifyFirstName() {
+  let firstNameInput = document.getElementById('firstName')
+  let firstNameErrorMsg = document.getElementById('firstNameErrorMsg')
+  firstNameInput.addEventListener("change", () => {
+    if (isValidAlphabetical(firstNameInput.value)) {
+      if (firstNameErrorMsg.innerText != "") {
+        firstNameErrorMsg.innerText = ""
+      }
+    } else {
+      if (firstNameErrorMsg.innerText == "") {
+        firstNameErrorMsg.innerText = "Votre prénom doit commencer par une majuscule et ne contenir que des lettres (prénoms composés autorisés avec - )"
+      }
+    }
+  })
+  if (isValidAlphabetical(firstNameInput.value)) {
+    return firstNameInput.value
+  } else {
+    return undefined
+  }
+}
+
+
+function verifyLastName() {
+  let lastNameInput = document.getElementById('lastName')
+  let lastNameErrorMsg = document.getElementById('lastNameErrorMsg')
+  lastNameInput.addEventListener("change", () => {
+    if (isValidAlphabetical(lastNameInput.value)) {
+      if (lastNameErrorMsg.innerText != "") {
+        lastNameErrorMsg.innerText = ""
+      }
+    } else {
+      if(lastNameErrorMsg.innerText == "") {
+        lastNameErrorMsg.innerText = "Votre nom de famille doit commencer par une majuscule (noms composés autorisés)"
+      }
+    }
+  })
+  if (isValidAlphabetical(lastNameInput.value)) {
+    return lastNameInput.value
+  } else {
+    return undefined
+  }
+}
+
+
+function verifyAddress() {
+  let addressInput = document.getElementById('address')
+  let addressErrorMsg = document.getElementById('addressErrorMsg')
+  addressInput.addEventListener('change', () => {
+    if (isValidAddress(addressInput.value)) {
+      if (addressErrorMsg.innerText != "") {
+        addressErrorMsg.innerText = ""
+      }
+    } else {
+      if (addressErrorMsg == "") {
+        addressErrorMsg.innerText = "Votre adresse doit commencer par votre n° suivi du nom de la voie"
+      }
+    }
+  })
+  if (isValidAddress(addressInput.value)) {
+    return addressInput.value
+  } else {
+    return undefined
+  }
+}
+
+
+function verifyCity() {
+  let cityInput = document.getElementById('city')
+  let cityErrorMsg = document.getElementById('cityErrorMsg')
+  cityInput.addEventListener('change', () => {
+    if (isValidCity(cityInput.value)) {
+      if (cityErrorMsg.innerText != "") {
+        cityErrorMsg.innerText = ""
+      }
+    } else {
+      if (cityErrorMsg.innerText == "") {
+        cityErrorMsg.innerText = "Veuillez indiquer d'abord votre code postal à 5 chiffres suivi d'un espace et du nom de votre ville commençant par une majuscule"
+      }
+    }
+  })
+  if (isValidCity(cityInput.value)) {
+    return cityInput.value
+  } else {
+    return undefined
+  }
+}
+
+function verifyEmail() {
+  let emailInput = document.getElementById('email')
+  let emailErrorMsg = document.getElementById('emailErrorMsg')
+  emailInput.addEventListener('change', () => {
+    if (isValidEmail(emailInput.value)) {
+      if (emailErrorMsg.innerText != "") {
+        emailErrorMsg.innerText = ""
+      }
+    } else {
+      if (emailErrorMsg.innerText == "") {
+        emailErrorMsg.innerText = "Veuillez entrer une adresse mail conforme (example@messagerie.domaine, example.example2@messagerie.domaine)"
+      }  
+    }
+  })
+  if (isValidEmail(emailInput.value)) {
+    return emailInput.value
+  } else {
+    return undefined
+  }
+}
+
+verifyFirstName()
+verifyLastName()
+verifyAddress()
+verifyCity()
+verifyEmail()
+
+function getOrder() {
+  let articlesToOrder =  section.querySelectorAll("article.cart__item")
+  let articlesIdToOrder = []
+  for (let articleToOrder of articlesToOrder) {
+    let articlePageId = articleToOrder.getAttribute('data-id')
+    if (!articlesIdToOrder.includes(articlePageId)) {
+      articlesIdToOrder.push(articlePageId)
+    }
+  }
+  return articlesIdToOrder
+}
+
+
+
+function createContact() {
+  let firstName = verifyFirstName()
+  let lastName = verifyLastName()
+  let address = verifyAddress()
+  let city = verifyCity()
+  let email = verifyEmail()
+  if ((firstName && lastName && address && city && email) != undefined) {
+    let newUser = {firstName, lastName, address, city, email}
+    return newUser
+  } else {
+    return undefined
+  }
+}
+
+// function verifyUser() {
+//   let user = createContact()
+//   console.log(user)
+//   let userInfos = Object.entries(user)
+//   console.log(userInfos)
+//   userInfos.forEach((userEntry) => {
+//     if (userEntry === undefined) {
+//       return undefined
+//     } else {
+//       return user
+//     }
+//   })
+// }
+
+function createCartOrder() {
+  let articlesOrdered = getOrder()
+  if (createContact() != undefined) {
+    let user = createContact()
+    let order = {
+      contact: user,
+      products: []
+    }
+    for (let article of articlesOrdered) {
+      order.products.push(article)
+    }
+    return order
+  } else {
+    return undefined
+  }
+}
+
+async function getOrderId(order) {
+  return fetch(`http://localhost:3000/api/products/order`, {
+    method: "POST",
+    headers: {
+      "Accept": 'application/json',
+      "Content-Type": "application/json"
+    },
+    body: order
+  })
+  .then((response) => response.json())
+}
+
+function sendCartOrder() {
+  let commandButton = document.getElementById("order")
+  commandButton.addEventListener('click', async (event) => {
+    event.preventDefault()
+    if (createCartOrder() != undefined) {
+      let order = JSON.stringify(createCartOrder())
+      let orderComplete = await getOrderId(order)
+      console.log(orderComplete)
+      let orderId = orderComplete.orderId
+      console.log(orderId)
+      window.localStorage.removeItem('cart')
+      window.location.replace(`./confirmation.html?order-id=${orderId}`)
+    }
+  })
+}
+
+sendCartOrder()
