@@ -8,8 +8,41 @@ async function getProductsArray() { //Récupération du tableau des Produits dep
 
 const section = document.querySelector('section.items') //Facilitation d'écriture pour plus tard en sélectionnant la section à remplir
 
-function createNewProductTemplate() {
+//Création d'une <img src="" alt=""/>
+function createNewImage(src, alt) {
+  let newImg = document.createElement('img')
+  newImg.src = src
+  newImg.alt = alt
+  return newImg
+}
+
+//Création d'un élément (div / span / p / h / section / article)
+function createNewFlowElement(tagName, cssClass= "", textToInsert = "", id = "") {
+  let newFlowElement = document.createElement(tagName)
+  if (cssClass != "") {newFlowElement.classList.add(cssClass)}
+  if (textToInsert != "") {newFlowElement.innerText = textToInsert}
+  if (id != "") {newFlowElement.id = id}
+  return newFlowElement
+}
+
+//Création d'un <article>
+function createNewArticle(cssClass = "") {
+  let newArticle = document.createElement("article")
+  if (cssClass != "") {newArticle.classList.add(cssClass)}
+  return newArticle
+}
+
+//Création d'un <a></a> sans texte (<a> englobant une card par exemple)
+function createNewLink(href) {
+  let newLink = document.createElement("a")
+  newLink.href = href
+  return newLink
+}
+
+
+function createNewProductArticle() {
     //Recréation d'un Template d'article
+    //let newLink = createNewLink("product.html")
     let newLink = document.createElement('a')    //Création de la balise englobante a
     newLink.href = "product.html"
     let newArticle = document.createElement('article')    //création de l'article conteneur
@@ -32,7 +65,7 @@ function createUrlParamsRequest(link) {
 function createProductOverview(index = 0, array) {
   const product = array[index]  //Définition intrinsèque des paramètres de la fonction
   const indexSelector = index + 1  //Décalage de l'index pour création du sélecteur CSS
-  createNewProductTemplate()  //Création de "l'instance" du produit
+  createNewProductArticle()  //Création de "l'instance" du produit
   const newLink = section.querySelector(`a:nth-child(${indexSelector})`) //Stockage pour réutilisation
   newLink.id = product._id  //Remplissage de l'Id de la card
   createUrlParamsRequest(newLink)
@@ -51,21 +84,3 @@ async function createProductsOverviews() {
 }
 
 createProductsOverviews()
-
-/*async function redirectToProductPage() {
-  await getProductsArray()
-  let linkArray = section.querySelectorAll('a')
-  for (let a of linkArray) {
-    const link = a.href
-    console.log(link)
-    const queryString = link.
-    console.log(queryString)
-    const urlParams = new URLSearchParams(link)
-    const id = urlParams.get('id')
-    console.log(id)
-    let queryString = a.getAttribute('href')
-    a.addEventListener("click", )
-  }
-}
-redirectToProductPage()
-*/

@@ -10,56 +10,100 @@ async function getAllProducts() {
   .then((response) => response.json())
 }
 
-function createProductArticle(product, color, quantity) {
-  let productId = product._id
-  let productName = product.name
-  let productImage = product.imageUrl
-  let productPrice = product.price
-  let productAltTxt = product.altTxt
-  let newArticle = document.createElement('article')
-  newArticle.classList.add('cart__item')
-  newArticle.setAttribute('data-id', `${productId}`)
-  newArticle.setAttribute('data-color', `${color}`)
-  let newDivImg = document.createElement('div')
-  newDivImg.classList.add('cart__item__img')
+//Création d'une <img src="" alt=""/>
+function createNewImage(src, alt) {
   let newImg = document.createElement('img')
-  newImg.src = productImage
-  newImg.alt = productAltTxt
+  newImg.src = src
+  newImg.alt = alt
+  return newImg
+}
+
+//Création d'un élément (div / span / p / h / section / article)
+function createNewFlowElement(tagName, cssClass= "", textToInsert = "", id = "") {
+  let newFlowElement = document.createElement(tagName)
+  if (cssClass != "") {newFlowElement.classList.add(cssClass)}
+  if (textToInsert != "") {newFlowElement.innerText = textToInsert}
+  if (id != "") {newFlowElement.id = id}
+  return newFlowElement
+}
+
+//Création d'un <article> spécifique possédant les attributs data-id & data-color
+function createNewArticle(cssClass = "", dataId = "", dataColor = "") {
+  let newArticle = document.createElement("article")
+  if (cssClass != "") {newArticle.classList.add(cssClass)}
+  if (dataId != "") {newArticle.setAttribute('data-id', `${dataId}`)}
+  if (dataColor != "") {newArticle.setAttribute('data-color', `${dataColor}`)}
+  return newArticle
+}
+
+//Création d'un <a></a> sans texte (<a> englobant une card par exemple)
+function createNewLink(href) {
+  let newLink = document.createElement("a")
+  newLink.href = href
+  return newLink
+}
+
+//Création d'<input> 
+function createNewInput(type, cssClass, name, value = 0, min = 1, max = 100, id = "") {
+  let newInput = document.createElement("input")
+  newInput.type = type
+  newInput.setAttribute("value", value)
+  newInput.value = value
+  newInput.min = min
+  newInput.max = max
+  if (id != undefined) {newInput.id = id}
+  if (cssClass != undefined) {newInput.classList.add(cssClass)}
+  if (name != undefined) {newInput.name = name}
+  return newInput
+}
+
+//Création de la div container de Img pour l'article du cart
+function createDivImg(product) {
+  let newDivImg = createNewFlowElement("div", "cart__item__img")
+  let newImg = createNewImage(product.imageUrl, product.altTxt)
   newDivImg.appendChild(newImg)
-  let newDivContent = document.createElement('div')
-  newDivContent.classList.add('cart__item__content')
-  let newDivDescription = document.createElement('div')
-  newDivDescription.classList.add('cart__item__content__description')
-  let newName = document.createElement('h2')
-  newName.innerText = productName
-  let newColor = document.createElement('p')
-  newColor.innerText = color
-  let newPrice = document.createElement('p')
-  newPrice.innerText = `${productPrice / 100}€`
+  return newDivImg
+}
+
+//Création de la div Description pour l'article du cart
+function createDivDescription(product, color) {
+  let newDivDescription = createNewFlowElement("div", "cart__item__content__description")
+  let newName = createNewFlowElement("h2", undefined, product.name)
+  let newColor = createNewFlowElement("p", undefined, color)
+  let newPrice = createNewFlowElement("p", undefined, `${product.price/100}€`)
   newDivDescription.appendChild(newName)
   newDivDescription.appendChild(newColor)
   newDivDescription.appendChild(newPrice)
-  let newDivSettings = document.createElement('div')
-  newDivSettings.classList.add('cart__item__content__settings')
-  let newDivQuantity = document.createElement('div')
-  newDivQuantity.classList.add('cart__item__content__settings__quantity')
-  let newPQuantity = document.createElement('p')
-  newPQuantity.innerText = "Qté : "
-  let newInputQuantity = document.createElement('input')
-  newInputQuantity.type = "number"
-  newInputQuantity.classList.add('itemQuantity')
-  newInputQuantity.name = "itemQuantity"
-  newInputQuantity.min = "1"
-  newInputQuantity.max = "100"
-  newInputQuantity.setAttribute('value', `${quantity}`)
-  newInputQuantity.value = quantity
+  return newDivDescription
+}
+
+//Création de la div Quantity pour l'article du cart
+function createDivQuantity(quantity) {
+  let newDivQuantity = createNewFlowElement("div", "cart__item__content__settings__quantity")
+  let newPQuantity = createNewFlowElement("p", undefined, "Qté : ")
+  let newInputQuantity = createNewInput("number", "itemQuantity", "itemQuantity", quantity)
   newDivQuantity.appendChild(newPQuantity)
   newDivQuantity.appendChild(newInputQuantity)
-  let newDivDelete = document.createElement('div')
-  newDivDelete.classList.add('cart__item__content__settings__delete')
-  let newPDelete = document.createElement('p')
-  newPDelete.innerText = "Supprimer"
+  return newDivQuantity
+}
+
+//Création de la div Delete pour l'article du cart
+function createDivDelete() {
+  let newDivDelete = createNewFlowElement("div", "cart__item__content__settings__delete")
+  let newPDelete = createNewFlowElement("p", undefined, "Supprimer")
   newDivDelete.appendChild(newPDelete)
+  return newDivDelete
+}
+
+//Création de l'article du cart
+function createProductArticle(product, color, quantity) {
+  let newArticle = createNewArticle("cart__item", product._id, color)
+  let newDivImg = createDivImg(product)
+  let newDivContent = createNewFlowElement("div", "cart__item__content")
+  let newDivDescription = createDivDescription(product, color)
+  let newDivSettings = createNewFlowElement("div", "cart__item__content__settings")
+  let newDivQuantity = createDivQuantity(quantity)
+  let newDivDelete = createDivDelete()
   newDivSettings.appendChild(newDivQuantity)
   newDivSettings.appendChild(newDivDelete)
   newDivContent.appendChild(newDivDescription)
@@ -69,21 +113,22 @@ function createProductArticle(product, color, quantity) {
   section.appendChild(newArticle)
 }
 
+//Récupération des infos du cart et des infos produits de l'API, comparaison croisée pour créer un unique article par couleur
 async function createArticlesFromCart() {
-  let cart = JSON.parse(window.localStorage.getItem('cart'))
-  let idsProducts = Object.getOwnPropertyNames(cart)
-  let colorsInCart = Object.values(cart)
-  for (let id of idsProducts) {
-    let idIndex = idsProducts.indexOf(id)
-    let product = await getProductFromId(id)
-    let colorsAvailable = product.colors
-    for (let colorsOrdered of colorsInCart) {
-      let colorIndex = colorsInCart.indexOf(colorsOrdered)
-      if (colorIndex == idIndex) {
-        for (let colorOrdered of colorsOrdered) {
-          if (colorOrdered.quantity != 0) {
+  if (window.localStorage.getItem('cart')) {
+    let cart = JSON.parse(window.localStorage.getItem('cart'))    //Récupération des infos du cart
+    let idsProducts = Object.getOwnPropertyNames(cart)  //Récupération des ids stockées dans le cart
+    let colorsInCart = Object.values(cart)  //Récupération des couleurs sélectionnées et stockées
+    for (let id of idsProducts) {
+      let idIndex = idsProducts.indexOf(id) //Premier index de comparaison
+      let product = await getProductFromId(id)  //Récupération des infos de l'API pour remplir les articles
+      let colorsAvailable = product.colors  
+      for (let colorsOrdered of colorsInCart) {
+        let colorIndex = colorsInCart.indexOf(colorsOrdered) //Second index de comparaison
+        if (colorIndex == idIndex) {  //Il s'agit bien du même produit dans les deux tableaux
+          for (let colorOrdered of colorsOrdered) {
             for (let colorAvailable of colorsAvailable) {
-              if (colorOrdered.color == colorAvailable) {
+              if (colorOrdered.color == colorAvailable) { //Correspondance des couleurs => création d'un <article>
                 createProductArticle(product, colorOrdered.color, colorOrdered.quantity)
               }
             }
@@ -95,29 +140,31 @@ async function createArticlesFromCart() {
 
 }
 
+//Récupération de toutes les values des itemQuantity
 function getTotalQuantity() {
   let inputsQuantity = document.querySelectorAll(".itemQuantity")
   let totalQuantity = 0
   for (let input of inputsQuantity) {
-    totalQuantity = totalQuantity += Number(input.value)
+    totalQuantity = totalQuantity += Number(input.value)  //Ajout à chaque itération de .itemQuantity.value
     document.getElementById('totalQuantity').innerText = totalQuantity
   }
 }
 
+//Récupération pour chaque <article> des value de itemQuantity et récupération du prix depuis l'API
 async function getTotalPrice() {
   let articlesInPage = document.querySelectorAll('#cart__items > article.cart__item')
   let totalPrice = 0
   for (let article of articlesInPage) {
     let numberOfArticles = Number(article.querySelector('.itemQuantity').value)
-    let articleId = article.getAttribute('data-id')
+    let articleId = article.getAttribute('data-id') //Récupération idProduct stored dans le data-id de article
     let product = await getProductFromId(articleId)
-    let articlePrice = product.price
+    let articlePrice = product.price  //Récupération du prix depuis l'API
     totalPrice = totalPrice += Number(numberOfArticles *= articlePrice /100)
-    document.getElementById('totalPrice').innerText = totalPrice.toFixed(2)
+    document.getElementById('totalPrice').innerText = totalPrice.toFixed(2) //Fixation de la fraction au centime
   }
 }
 
-
+//Suppression de l'article en appuyant sur le <p>Supprimer</p>
 function deleteArticle() {
   let deleteButtons = section.querySelectorAll('.cart__item__content__settings__delete > p')
   for (let deleteButton of deleteButtons) {
@@ -138,13 +185,13 @@ function deleteArticle() {
           articleTargetDelete.parentNode.removeChild(articleTargetDelete)
         }
       }
-      getTotalPrice()
-      getTotalQuantity()
+      getTotalPrice() //Recalcul à chaque suppression
+      getTotalQuantity()  //Recalcul à chaque suppression
     })
   }
 }
 
-
+//Vérification des données entrées dans les inputs type="number"
 function verifyQuantity(quantityInput) {
   let errorMessageQuantity = document.createElement('p')  //Création d'un paragraphe contenant le futur message d'erreur
   errorMessageQuantity.classList.add('errorQuantity')
@@ -168,7 +215,7 @@ function verifyQuantity(quantityInput) {
       }
       return console.error('0 or less')
   } else if (Number(quantityInput.value) > 100) {  //Traitement du cas où la quantité demandée est supérieure à 100
-      quantityInput.value = 100 //Mise de l'input à la valeur par défaut
+      quantityInput.value = 100 //Mise de l'input à la valeur maximale
       errorMessageQuantity.innerText = "La quantité maximale à la commande est de cent (100)" 
       if (!parentDiv.querySelector('p.errorQuantity')){
         parentDiv.appendChild(errorMessageQuantity)  //Insertion du message d'erreur
@@ -185,14 +232,14 @@ function verifyQuantity(quantityInput) {
   }
 }
 
-
+//Monitoring des changements de valeurs des inputs quantité
 function changeQuantity() {
   let quantityInputs = section.querySelectorAll('.cart__item__content__settings__quantity > input')
   for (let quantityInput of quantityInputs) {
     quantityInput.addEventListener('change', () => {
       verifyQuantity(quantityInput)
-      getTotalPrice()
-      getTotalQuantity()
+      getTotalPrice() //Recalcul à chaque modification
+      getTotalQuantity()  //Recalcul à chaque modification
       if (quantityInput.value >= 1 || quantityInput.value <= 100) {
         let articleTargetChange = quantityInput.closest('article.cart__item')
         let idArticleTarget = articleTargetChange.getAttribute('data-id')
@@ -210,6 +257,7 @@ function changeQuantity() {
   }
 }
 
+//Fonction de gestion du cart, créant le cart, faisant les deux totaux et gérant la suppression ou la modification
 async function manageCart() {
   await createArticlesFromCart()
   getTotalQuantity()
@@ -220,6 +268,9 @@ async function manageCart() {
 
 manageCart()
 
+//---------------------------------------------------------------------//
+//----------------------------Regex------------------------------------//
+//---------------------------------------------------------------------//
 const formContact = document.querySelector('form.cart__order__form')
 
 const nameRegex = /([A-Z]{1}[a-zéèàç]+){1}([\S\-\1])*$/
@@ -231,6 +282,10 @@ const cityRegex = /([0-9]{5}){1}\s([A-Z]{1}[a-zéèàç]+){1}([\S\-\2])*$/
 const emailRegex = /([a-z]+[0-9]*[a-z0-9.\-_]+)+@([a-z]{1,}).([a-z]{1,})$/i
 
 const emailRegex2 = /(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\[(?:(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9]))\.){3}(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9])|[a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])/
+
+//----------------------------------------------------------------------//
+//--------------------Validation par les Regex--------------------------//
+//----------------------------------------------------------------------//
 
 function isValidAlphabetical(inputValue) {
   return nameRegex.test(inputValue)
@@ -248,10 +303,15 @@ function isValidEmail(inputValue) {
   return emailRegex2.test(inputValue)
 }
 
+//---------------------------------------------------------------------//
+//---------------------------------------------------------------------//
+//---------------------------------------------------------------------//
+
+//Vérification de l'input Prénom. Si incorrect, retourne "undefined"
 function verifyFirstName() {
   let firstNameInput = document.getElementById('firstName')
   let firstNameErrorMsg = document.getElementById('firstNameErrorMsg')
-  firstNameInput.addEventListener("change", () => {
+  firstNameInput.addEventListener("change", () => { //EventListener pour affichage du message d'erreur et correction
     if (isValidAlphabetical(firstNameInput.value)) {
       if (firstNameErrorMsg.innerText != "") {
         firstNameErrorMsg.innerText = ""
@@ -262,6 +322,7 @@ function verifyFirstName() {
       }
     }
   })
+  //Retour de la fonction pour vérification via les regex
   if (isValidAlphabetical(firstNameInput.value)) {
     return firstNameInput.value
   } else {
@@ -269,11 +330,11 @@ function verifyFirstName() {
   }
 }
 
-
+//Vérification de l'input Nom. Si incorrect return "undefined"
 function verifyLastName() {
   let lastNameInput = document.getElementById('lastName')
   let lastNameErrorMsg = document.getElementById('lastNameErrorMsg')
-  lastNameInput.addEventListener("change", () => {
+  lastNameInput.addEventListener("change", () => {  //EventListener pour affichage du message d'erreur et correction
     if (isValidAlphabetical(lastNameInput.value)) {
       if (lastNameErrorMsg.innerText != "") {
         lastNameErrorMsg.innerText = ""
@@ -284,6 +345,7 @@ function verifyLastName() {
       }
     }
   })
+  //Retour de la fonction pour vérification via les regex
   if (isValidAlphabetical(lastNameInput.value)) {
     return lastNameInput.value
   } else {
@@ -291,11 +353,11 @@ function verifyLastName() {
   }
 }
 
-
+//Vérification de l'input Adresse. Si incorrect return "undefined"
 function verifyAddress() {
   let addressInput = document.getElementById('address')
   let addressErrorMsg = document.getElementById('addressErrorMsg')
-  addressInput.addEventListener('change', () => {
+  addressInput.addEventListener('change', () => { //EventListener pour affichage du message d'erreur et correction
     if (isValidAddress(addressInput.value)) {
       if (addressErrorMsg.innerText != "") {
         addressErrorMsg.innerText = ""
@@ -306,6 +368,7 @@ function verifyAddress() {
       }
     }
   })
+  //Retour de la fonction pour vérification via les regex
   if (isValidAddress(addressInput.value)) {
     return addressInput.value
   } else {
@@ -313,7 +376,7 @@ function verifyAddress() {
   }
 }
 
-
+//Vérification de l'input Ville. Si incorrect return "undefined"
 function verifyCity() {
   let cityInput = document.getElementById('city')
   let cityErrorMsg = document.getElementById('cityErrorMsg')
@@ -328,6 +391,7 @@ function verifyCity() {
       }
     }
   })
+  //Retour de la fonction pour vérification via les regex
   if (isValidCity(cityInput.value)) {
     return cityInput.value
   } else {
@@ -335,6 +399,7 @@ function verifyCity() {
   }
 }
 
+//Vérification de l'input Email. Si incorrect return "undefined"
 function verifyEmail() {
   let emailInput = document.getElementById('email')
   let emailErrorMsg = document.getElementById('emailErrorMsg')
@@ -349,6 +414,7 @@ function verifyEmail() {
       }  
     }
   })
+  //Retour de la fonction pour vérification via les regex
   if (isValidEmail(emailInput.value)) {
     return emailInput.value
   } else {
@@ -356,33 +422,48 @@ function verifyEmail() {
   }
 }
 
+//-------------------------------------------------------------------------//
+//------------------------Appel pour les EventListener---------------------//
+//-------------------------------------------------------------------------//
+
 verifyFirstName()
 verifyLastName()
 verifyAddress()
 verifyCity()
 verifyEmail()
 
+//-------------------------------------------------------------------//
+//------------Création de l'objet pour méthode "POST"----------------//
+//-------------------------------------------------------------------//
+
+//Création du tableau products pour la méthode "POST"
+
 function getOrder() {
   let articlesToOrder =  section.querySelectorAll("article.cart__item")
   let articlesIdToOrder = []
   for (let articleToOrder of articlesToOrder) {
+    let articleQuantityInputValue = articleToOrder.querySelector("div.cart__item__content__settings__quantity > input").value
     let articlePageId = articleToOrder.getAttribute('data-id')
-    if (!articlesIdToOrder.includes(articlePageId)) {
+    if ((!articlesIdToOrder.includes(articlePageId)) /*L'id n'est pas déjà présente dans le tableau*/ && articleQuantityInputValue > 0/*L'input n'est pas à zéro*/) {  //Choix personnel quant à la non-suppression d'un article dont l'input est à zéro
       articlesIdToOrder.push(articlePageId)
     }
   }
-  return articlesIdToOrder
+  if (articlesIdToOrder.length > 0) { //Si les conditions sont respectées et que le tableau n'est pas vide, le retourner
+    return articlesIdToOrder
+  } else {
+    return undefined
+  }
 }
 
-
-
+//Création de l'objet contact pour la méthode "Post"
 function createContact() {
+  //Vérification de tous les inputs de contact
   let firstName = verifyFirstName()
   let lastName = verifyLastName()
   let address = verifyAddress()
   let city = verifyCity()
   let email = verifyEmail()
-  if ((firstName && lastName && address && city && email) != undefined) {
+  if ((firstName && lastName && address && city && email) != undefined) { //newUser n'est créé que si tous les champs sont correctement remplis (vérifiés par les Regex)
     let newUser = {firstName, lastName, address, city, email}
     return newUser
   } else {
@@ -390,23 +471,11 @@ function createContact() {
   }
 }
 
-// function verifyUser() {
-//   let user = createContact()
-//   console.log(user)
-//   let userInfos = Object.entries(user)
-//   console.log(userInfos)
-//   userInfos.forEach((userEntry) => {
-//     if (userEntry === undefined) {
-//       return undefined
-//     } else {
-//       return user
-//     }
-//   })
-// }
 
+//Création de la commande order: {contact:{...}, products:[...]}
 function createCartOrder() {
   let articlesOrdered = getOrder()
-  if (createContact() != undefined) {
+  if ((createContact() && articlesOrdered) != undefined) { //Si le contact a été crée et qu'il y a des articles dans le panier
     let user = createContact()
     let order = {
       contact: user,
@@ -421,6 +490,7 @@ function createCartOrder() {
   }
 }
 
+//Fonction fetch "POST" de l'objet order et récupération de l'orderId
 async function getOrderId(order) {
   return fetch(`http://localhost:3000/api/products/order`, {
     method: "POST",
@@ -433,18 +503,26 @@ async function getOrderId(order) {
   .then((response) => response.json())
 }
 
+//Fonction d'envoi du formulaire uniquement si les conditions sont toutes remplies
 function sendCartOrder() {
   let commandButton = document.getElementById("order")
   commandButton.addEventListener('click', async (event) => {
     event.preventDefault()
-    if (createCartOrder() != undefined) {
+    if (createCartOrder() != undefined) { //Vérification de l'objet à envoyer à l'API (suivant la vérification des inputs de contact et du cart)
       let order = JSON.stringify(createCartOrder())
       let orderComplete = await getOrderId(order)
-      console.log(orderComplete)
-      let orderId = orderComplete.orderId
-      console.log(orderId)
-      window.localStorage.removeItem('cart')
-      window.location.replace(`./confirmation.html?order-id=${orderId}`)
+      let orderId = orderComplete.orderId //Récupération de l'orderId
+      //Gestion de la suppression du message d'erreur lorsque les conditions nécessaires à l'envoi sont respectées
+      if (commandButton.closest('form').querySelector('p.sendErrorMsg')) {
+        commandButton.closest('form').removeChild(commandButton.closest('form').querySelector('p.sendErrorMsg'))
+      }
+      window.localStorage.removeItem('cart')  //Suppression du cart une fois la commande envoyée
+      window.location.replace(`./confirmation.html?order-id=${orderId}`)  //Redirection vers la page confirmation avec une URLParamsRequest
+    } else {  //Gestion du non-envoi du formulaire si toutes les conditions ne sont pas respectées
+      let sendErrorMsg = createNewFlowElement("p", "sendErrorMsg", "Veuillez vérifier que votre panier n'est pas vide et que vos informations de contact sont correctes!")
+      sendErrorMsg.setAttribute('style', 'text-align: center')
+      if (!commandButton.closest('form').querySelector('p.sendErrorMsg')) //Si le message n'est pas inséré, l'insérer
+      commandButton.closest('form').appendChild(sendErrorMsg)
     }
   })
 }
