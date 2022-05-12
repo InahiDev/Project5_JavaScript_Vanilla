@@ -3,11 +3,13 @@ const section = document.getElementById('cart__items')
 async function getProductFromId(id) {
   return fetch(`http://localhost:3000/api/products/${id}`) //Récupération du produit correspondant à id
   .then((response) => response.json()) //Mise au format JSON de la réponse
+  .catch((error) => console.log(error))
 }
 
 async function getAllProducts() {
   return fetch(`http://localhost:3000/api/products`)
   .then((response) => response.json())
+  .catch((error) => console.log(error))
 }
 
 //Création d'une <img src="" alt=""/>
@@ -113,6 +115,20 @@ function createProductArticle(product, color, quantity) {
   section.appendChild(newArticle)
 }
 
+//Ajout d'un message d'erreur s'il n'existe pas déjà
+function appendMsgIfDontExist(parent, child, cssSelector) {
+  if (!parent.querySelector(cssSelector)) {
+    parent.appendChild(child)
+  }
+}
+
+//Suppression d'un message d'erreur si correction
+function removeMsgIfExist(parent, cssSelector) {
+  if(parent.querySelector(cssSelector)) {
+    parent.removeChild(parent.querySelector(cssSelector))
+  }
+}
+
 //Récupération des infos du cart et des infos produits de l'API, comparaison croisée pour créer un unique article par couleur
 async function createArticlesFromCart() {
   if (window.localStorage.getItem('cart')) {
@@ -137,7 +153,6 @@ async function createArticlesFromCart() {
       }
     }
   }
-
 }
 
 //Récupération de toutes les values des itemQuantity
@@ -193,41 +208,29 @@ function deleteArticle() {
 
 //Vérification des données entrées dans les inputs type="number"
 function verifyQuantity(quantityInput) {
-  let errorMessageQuantity = document.createElement('p')  //Création d'un paragraphe contenant le futur message d'erreur
-  errorMessageQuantity.classList.add('errorQuantity')
+  let errorQuantityMsg = createNewFlowElement ("p", "errorQuantity")
   let parentDiv = quantityInput.closest('div')
-  if (quantityInput.value == Number.isNaN(quantityInput.value) && quantityInput.value != "0") {  //Si les données saisies ne sont pas un nombre et suppression de la particularité du cas Zéro du comportement de isNaN
+    if (quantityInput.value == Number.isNaN(quantityInput.value) && quantityInput.value != "0") {  //Si les données saisies ne sont pas un nombre et suppression de la particularité du cas Zéro du comportement de isNaN
       quantityInput.value = 0  //Mise de l'input à la valeur minimale
-      errorMessageQuantity.innerText = "Veuillez entrer un nombre s'il vous plait"  
-      if (!parentDiv.querySelector('p.errorQuantity')) {
-      parentDiv.appendChild(errorMessageQuantity)  //Insertion du message d'erreur
-      } else if (parentDiv.querySelector('p.errorQuantity')) {
-        parentDiv.querySelector('p.errorQuantity').innerText = "Veuillez entrer un nombre s'il vous plait"
-      }
-    return console.error('not a number')
+      const notANumber = "Veuillez entrer un nombre s'il vous plait"
+      errorQuantityMsg.innerText = notANumber  
+      appendMsgIfDontExist(parentDiv, errorQuantityMsg, "p.errorQuantity")
+      parentDiv.querySelector('p.errorQuantity').innerText = notANumber
   } else if(quantityInput.value == "0" || Number(quantityInput.value) < 1) { //Traitement des cas où input <1 et traitement du cas spécifique ou le chiffre saisi est 0
       quantityInput.value = 0  //Mise de l'input à la valeur minimale
-      errorMessageQuantity.innerText = "Pour supprimer l'article, appuyez sur «Supprimer»" 
-      if (!parentDiv.querySelector('p.errorQuantity')) {
-        parentDiv.appendChild(errorMessageQuantity)  //Insertion du message d'erreur
-      } else if (parentDiv.querySelector('p.errorQuantity')) {
-        parentDiv.querySelector('p.errorQuantity').innerText = "Pour supprimer l'article, appuyez sur «Supprimer»"
-      }
-      return console.error('0 or less')
+      const underZero = "Pour supprimer l'article, appuyez sur «Supprimer»"
+      errorQuantityMsg.innerText = underZero
+      appendMsgIfDontExist(parentDiv, errorQuantityMsg, "p.errorQuantity")
+      parentDiv.querySelector('p.errorQuantity').innerText = underZero
   } else if (Number(quantityInput.value) > 100) {  //Traitement du cas où la quantité demandée est supérieure à 100
       quantityInput.value = 100 //Mise de l'input à la valeur maximale
-      errorMessageQuantity.innerText = "La quantité maximale à la commande est de cent (100)" 
-      if (!parentDiv.querySelector('p.errorQuantity')){
-        parentDiv.appendChild(errorMessageQuantity)  //Insertion du message d'erreur
-      } else if (parentDiv.querySelector('p.errorQuantity')) {
-        parentDiv.querySelector('p.errorQuantity').innerText = "La quantité maximale à la commande est de cent (100)"
-      }
-      return console.error('over 100')
+      const overHundred = "La quantité maximale à la commande est de cent (100)"
+      errorQuantityMsg.innerText = overHundred 
+      appendMsgIfDontExist(parentDiv, errorQuantityMsg, "p.errorQuantity")
+      parentDiv.querySelector('p.errorQuantity').innerText = "La quantité maximale à la commande est de cent (100)"
   } else if ((Number(quantityInput.value) >= 1) && (Number(quantityInput.value) <= 100)) { //Cas où les données sont correctes
       quantityInput.setAttribute('value', quantityInput.value)
-      if (parentDiv.querySelector('p.errorQuantity')) { //Cas où les données sont corrigées de la part de l'utilisateur 
-        parentDiv.removeChild(parentDiv.querySelector('p.errorQuantity')) //Suppression du message d'erreur
-      }
+      removeMsgIfExist(parentDiv, "p.errorQuantity")
       return quantityInput.value
   }
 }
@@ -275,9 +278,9 @@ const formContact = document.querySelector('form.cart__order__form')
 
 const nameRegex = /([A-Z]{1}[a-zéèàç]+){1}([\S\-\1])*$/
 
-const adressRegex = /([0-9]{1,4})\ {1}([^\t\n\r][a-zéèàçùA-Z0-9\s\-\,\.]*)$/
+const addressRegex = /([0-9]{1,4})\ {1}([^\t\n\r][a-zéèàçùA-Z0-9\s\-\,\.]+)$/
 
-const cityRegex = /([0-9]{5}){1}\s([A-Z]{1}[a-zéèàç]+){1}([\S\-\2])*$/
+const cityRegex = /([0-9]{5}){1}\s([A-Z]{1}[a-zéèàçù]+){1}([\S\-\2])*$/
 
 const emailRegex = /([a-z]+[0-9]*[a-z0-9.\-_]+)+@([a-z]{1,}).([a-z]{1,})$/i
 
@@ -292,7 +295,7 @@ function isValidAlphabetical(inputValue) {
 }
 
 function isValidAddress(inputValue) {
-  return adressRegex.test(inputValue)
+  return addressRegex.test(inputValue)
 }
 
 function isValidCity(inputValue) {
@@ -310,19 +313,6 @@ function isValidEmail(inputValue) {
 //Vérification de l'input Prénom. Si incorrect, retourne "undefined"
 function verifyFirstName() {
   let firstNameInput = document.getElementById('firstName')
-  let firstNameErrorMsg = document.getElementById('firstNameErrorMsg')
-  firstNameInput.addEventListener("change", () => { //EventListener pour affichage du message d'erreur et correction
-    if (isValidAlphabetical(firstNameInput.value)) {
-      if (firstNameErrorMsg.innerText != "") {
-        firstNameErrorMsg.innerText = ""
-      }
-    } else {
-      if (firstNameErrorMsg.innerText == "") {
-        firstNameErrorMsg.innerText = "Votre prénom doit commencer par une majuscule et ne contenir que des lettres (prénoms composés autorisés avec - )"
-      }
-    }
-  })
-  //Retour de la fonction pour vérification via les regex
   if (isValidAlphabetical(firstNameInput.value)) {
     return firstNameInput.value
   } else {
@@ -330,22 +320,26 @@ function verifyFirstName() {
   }
 }
 
-//Vérification de l'input Nom. Si incorrect return "undefined"
-function verifyLastName() {
-  let lastNameInput = document.getElementById('lastName')
-  let lastNameErrorMsg = document.getElementById('lastNameErrorMsg')
-  lastNameInput.addEventListener("change", () => {  //EventListener pour affichage du message d'erreur et correction
-    if (isValidAlphabetical(lastNameInput.value)) {
-      if (lastNameErrorMsg.innerText != "") {
-        lastNameErrorMsg.innerText = ""
+//Affichage d'un message d'erreur pour l'<input> Prénom
+function firstNameEventListener() {
+  let firstNameInput = document.getElementById('firstName')
+  let firstNameErrorMsg = document.getElementById('firstNameErrorMsg')
+  firstNameInput.addEventListener("change", () => { //EventListener pour affichage du message d'erreur et correction
+    if (isValidAlphabetical(firstNameInput.value)) {
+      if (firstNameErrorMsg.innerText !== "") {
+        firstNameErrorMsg.innerText = ""
       }
     } else {
-      if(lastNameErrorMsg.innerText == "") {
-        lastNameErrorMsg.innerText = "Votre nom de famille doit commencer par une majuscule (noms composés autorisés)"
+      if (firstNameErrorMsg.innerText === "") {
+        firstNameErrorMsg.innerText = "Votre prénom doit commencer par une majuscule et ne contenir que des lettres (prénoms composés autorisés avec - )"
       }
     }
   })
-  //Retour de la fonction pour vérification via les regex
+}
+
+//Vérification de l'input Nom. Si incorrect return "undefined"
+function verifyLastName() {
+  let lastNameInput = document.getElementById('lastName')
   if (isValidAlphabetical(lastNameInput.value)) {
     return lastNameInput.value
   } else {
@@ -353,22 +347,26 @@ function verifyLastName() {
   }
 }
 
-//Vérification de l'input Adresse. Si incorrect return "undefined"
-function verifyAddress() {
-  let addressInput = document.getElementById('address')
-  let addressErrorMsg = document.getElementById('addressErrorMsg')
-  addressInput.addEventListener('change', () => { //EventListener pour affichage du message d'erreur et correction
-    if (isValidAddress(addressInput.value)) {
-      if (addressErrorMsg.innerText != "") {
-        addressErrorMsg.innerText = ""
+//Affichage d'un message d'erreur pour l'<input> Nom
+function lastNameEventListener() {
+  let lastNameInput = document.getElementById('lastName')
+  let lastNameErrorMsg = document.getElementById('lastNameErrorMsg')
+  lastNameInput.addEventListener("change", () => {  //EventListener pour affichage du message d'erreur et correction
+    if (isValidAlphabetical(lastNameInput.value)) {
+      if (lastNameErrorMsg.innerText !== "") {
+        lastNameErrorMsg.innerText = ""
       }
     } else {
-      if (addressErrorMsg == "") {
-        addressErrorMsg.innerText = "Votre adresse doit commencer par votre n° suivi du nom de la voie"
+      if(lastNameErrorMsg.innerText === "") {
+        lastNameErrorMsg.innerText = "Votre nom de famille doit commencer par une majuscule (noms composés autorisés)"
       }
     }
   })
-  //Retour de la fonction pour vérification via les regex
+}
+
+//Vérification de l'input Adresse. Si incorrect return "undefined"
+function verifyAddress() {
+  let addressInput = document.getElementById('address')
   if (isValidAddress(addressInput.value)) {
     return addressInput.value
   } else {
@@ -376,22 +374,26 @@ function verifyAddress() {
   }
 }
 
-//Vérification de l'input Ville. Si incorrect return "undefined"
-function verifyCity() {
-  let cityInput = document.getElementById('city')
-  let cityErrorMsg = document.getElementById('cityErrorMsg')
-  cityInput.addEventListener('change', () => {
-    if (isValidCity(cityInput.value)) {
-      if (cityErrorMsg.innerText != "") {
-        cityErrorMsg.innerText = ""
+//Affichage d'un message d'erreur pour l'<input> Adresse
+function addressEventListener() {
+  let addressInput = document.getElementById('address')
+  let addressErrorMsg = document.getElementById('addressErrorMsg')
+  addressInput.addEventListener('change', () => { 
+    if (isValidAddress(addressInput.value)) {
+      if (addressErrorMsg.innerText !== "") {
+        addressErrorMsg.innerText = ""
       }
     } else {
-      if (cityErrorMsg.innerText == "") {
-        cityErrorMsg.innerText = "Veuillez indiquer d'abord votre code postal à 5 chiffres suivi d'un espace et du nom de votre ville commençant par une majuscule"
+      if (addressErrorMsg.innerText === "") {
+        addressErrorMsg.innerText = "Votre adresse doit commencer par votre n° suivi du nom de la voie"
       }
     }
   })
-  //Retour de la fonction pour vérification via les regex
+}
+
+//Vérification de l'input Ville. Si incorrect return "undefined"
+function verifyCity() {
+  let cityInput = document.getElementById('city')
   if (isValidCity(cityInput.value)) {
     return cityInput.value
   } else {
@@ -399,8 +401,35 @@ function verifyCity() {
   }
 }
 
+//Affichage d'un message d'erreur pour l'<input> City
+function cityEventListener() {
+  let cityInput = document.getElementById('city')
+  let cityErrorMsg = document.getElementById('cityErrorMsg')
+  cityInput.addEventListener('change', () => {
+    if (isValidCity(cityInput.value)) {
+      if (cityErrorMsg.innerText !== "") {
+        cityErrorMsg.innerText = ""
+      }
+    } else {
+      if (cityErrorMsg.innerText === "") {
+        cityErrorMsg.innerText = "Veuillez indiquer d'abord votre code postal à 5 chiffres suivi d'un espace et du nom de votre ville commençant par une majuscule"
+      }
+    }
+  })
+}
+
 //Vérification de l'input Email. Si incorrect return "undefined"
 function verifyEmail() {
+  let emailInput = document.getElementById('email')
+  if (isValidEmail(emailInput.value)) {
+    return emailInput.value
+  } else {
+    return undefined
+  }
+}
+
+//Affichage d'un message d'erreur pour l'<input> Email
+function emailEventListener() {
   let emailInput = document.getElementById('email')
   let emailErrorMsg = document.getElementById('emailErrorMsg')
   emailInput.addEventListener('change', () => {
@@ -414,30 +443,23 @@ function verifyEmail() {
       }  
     }
   })
-  //Retour de la fonction pour vérification via les regex
-  if (isValidEmail(emailInput.value)) {
-    return emailInput.value
-  } else {
-    return undefined
-  }
 }
 
 //-------------------------------------------------------------------------//
-//------------------------Appel pour les EventListener---------------------//
+//-----------------------Appel des EventListener---------------------------//
 //-------------------------------------------------------------------------//
 
-verifyFirstName()
-verifyLastName()
-verifyAddress()
-verifyCity()
-verifyEmail()
+firstNameEventListener()
+lastNameEventListener()
+addressEventListener()
+cityEventListener()
+emailEventListener()
 
 //-------------------------------------------------------------------//
 //------------Création de l'objet pour méthode "POST"----------------//
 //-------------------------------------------------------------------//
 
 //Création du tableau products pour la méthode "POST"
-
 function getOrder() {
   let articlesToOrder =  section.querySelectorAll("article.cart__item")
   let articlesIdToOrder = []
@@ -457,8 +479,7 @@ function getOrder() {
 
 //Création de l'objet contact pour la méthode "Post"
 function createContact() {
-  //Vérification de tous les inputs de contact
-  let firstName = verifyFirstName()
+  let firstName = verifyFirstName()  //Vérification de tous les inputs de contact
   let lastName = verifyLastName()
   let address = verifyAddress()
   let city = verifyCity()
@@ -475,8 +496,8 @@ function createContact() {
 //Création de la commande order: {contact:{...}, products:[...]}
 function createCartOrder() {
   let articlesOrdered = getOrder()
-  if ((createContact() && articlesOrdered) != undefined) { //Si le contact a été crée et qu'il y a des articles dans le panier
-    let user = createContact()
+  let user = createContact()
+  if ((user && articlesOrdered) != undefined) { //Si le contact a été crée et qu'il y a des articles dans le panier
     let order = {
       contact: user,
       products: []
@@ -501,28 +522,26 @@ async function getOrderId(order) {
     body: order
   })
   .then((response) => response.json())
+  .catch((error) => console.log(error))
 }
 
 //Fonction d'envoi du formulaire uniquement si les conditions sont toutes remplies
 function sendCartOrder() {
   let commandButton = document.getElementById("order")
+  const formParent = commandButton.closest('form')
   commandButton.addEventListener('click', async (event) => {
     event.preventDefault()
     if (createCartOrder() != undefined) { //Vérification de l'objet à envoyer à l'API (suivant la vérification des inputs de contact et du cart)
       let order = JSON.stringify(createCartOrder())
       let orderComplete = await getOrderId(order)
       let orderId = orderComplete.orderId //Récupération de l'orderId
-      //Gestion de la suppression du message d'erreur lorsque les conditions nécessaires à l'envoi sont respectées
-      if (commandButton.closest('form').querySelector('p.sendErrorMsg')) {
-        commandButton.closest('form').removeChild(commandButton.closest('form').querySelector('p.sendErrorMsg'))
-      }
+      removeMsgIfExist(formParent, "p.sendErrorMsg")
       window.localStorage.removeItem('cart')  //Suppression du cart une fois la commande envoyée
       window.location.replace(`./confirmation.html?order-id=${orderId}`)  //Redirection vers la page confirmation avec une URLParamsRequest
     } else {  //Gestion du non-envoi du formulaire si toutes les conditions ne sont pas respectées
       let sendErrorMsg = createNewFlowElement("p", "sendErrorMsg", "Veuillez vérifier que votre panier n'est pas vide et que vos informations de contact sont correctes!")
       sendErrorMsg.setAttribute('style', 'text-align: center')
-      if (!commandButton.closest('form').querySelector('p.sendErrorMsg')) //Si le message n'est pas inséré, l'insérer
-      commandButton.closest('form').appendChild(sendErrorMsg)
+      appendMsgIfDontExist(formParent, sendErrorMsg, "p.sendErrorMsg")
     }
   })
 }
