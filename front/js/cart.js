@@ -276,7 +276,7 @@ manageCart()
 //---------------------------------------------------------------------//
 const formContact = document.querySelector('form.cart__order__form')
 
-const nameRegex = /([A-Z]{1}[a-zéèàç]+){1}([\S\-\1])*$/
+const nameRegex = /([^0-9][A-Z]{1}[a-zéèàç][^0-9]+){1}([\S\-\1])*$/
 
 const addressRegex = /([0-9]{1,4})\ {1}([^\t\n\r][a-zéèàçùA-Z0-9\s\-\,\.]+)$/
 
