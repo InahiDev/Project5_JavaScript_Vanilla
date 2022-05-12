@@ -276,11 +276,14 @@ manageCart()
 //---------------------------------------------------------------------//
 const formContact = document.querySelector('form.cart__order__form')
 
-const nameRegex = /([^0-9][A-Z]{1}[a-zéèàç][^0-9]+){1}([\S\-\1])*$/
+const nameRegex = /([A-Z]{1}[a-zéèàç]+){1,}([\S\-\1])*/
+const nameRegex2 = /^([A-Z]{1}([a-zéèàçù][\D])*\b){1,}([\S\-]{1}(([A-Z]{1}([a-zéèàçù][\D])+))*\b)*$/
+const nameRegex3 = /^([A-Z]{1}[a-zéèàç]+){1}\b(([\D][\S\-\1]))*$/
+const nameRegex4 = /^([A-Z]{1}[a-zéèàçù-]+){1}\b$/
 
 const addressRegex = /([0-9]{1,4})\ {1}([^\t\n\r][a-zéèàçùA-Z0-9\s\-\,\.]+)$/
 
-const cityRegex = /([0-9]{5}){1}\s([A-Z]{1}[a-zéèàçù]+){1}([\S\-\2])*$/
+const cityRegex = /([0-9]{5}){1}\s([A-Z]{1}[a-zéèàçù\s-]+){1,}$/
 
 const emailRegex = /([a-z]+[0-9]*[a-z0-9.\-_]+)+@([a-z]{1,}).([a-z]{1,})$/i
 
@@ -291,7 +294,7 @@ const emailRegex2 = /(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|
 //----------------------------------------------------------------------//
 
 function isValidAlphabetical(inputValue) {
-  return nameRegex.test(inputValue)
+  return nameRegex4.test(inputValue)
 }
 
 function isValidAddress(inputValue) {
