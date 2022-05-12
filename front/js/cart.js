@@ -144,7 +144,7 @@ async function createArticlesFromCart() {
         if (colorIndex == idIndex) {  //Il s'agit bien du même produit dans les deux tableaux
           for (let colorOrdered of colorsOrdered) {
             for (let colorAvailable of colorsAvailable) {
-              if (colorOrdered.color == colorAvailable) { //Correspondance des couleurs => création d'un <article>
+              if (colorOrdered.color == colorAvailable) { //La couleur dans la fiche produit a été retrouvée dans le cart => création d'un <article>
                 createProductArticle(product, colorOrdered.color, colorOrdered.quantity)
               }
             }
