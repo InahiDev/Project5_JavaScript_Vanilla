@@ -280,6 +280,7 @@ const nameRegex = /([A-Z]{1}[a-zéèàç]+){1,}([\S\-\1])*/
 const nameRegex2 = /^([A-Z]{1}([a-zéèàçù][\D])*\b){1,}([\S\-]{1}(([A-Z]{1}([a-zéèàçù][\D])+))*\b)*$/
 const nameRegex3 = /^([A-Z]{1}[a-zéèàç]+){1}\b(([\D][\S\-\1]))*$/
 const nameRegex4 = /^([A-Z]{1}[a-zéèàçù-]+){1}\b$/
+const nameRegex5 = /^(([A-Z]{1}([a-zâäëéèàùçï]+))([-][A-Z]{1}([a-zâäëéèàùçï]+))*){1}$/
 
 const addressRegex = /([0-9]{1,4})\ {1}([^\t\n\r][a-zéèàçùA-Z0-9\s\-\,\.]+)$/
 
@@ -294,7 +295,7 @@ const emailRegex2 = /(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|
 //----------------------------------------------------------------------//
 
 function isValidAlphabetical(inputValue) {
-  return nameRegex4.test(inputValue)
+  return nameRegex5.test(inputValue)
 }
 
 function isValidAddress(inputValue) {
@@ -334,7 +335,7 @@ function firstNameEventListener() {
       }
     } else {
       if (firstNameErrorMsg.innerText === "") {
-        firstNameErrorMsg.innerText = "Votre prénom doit commencer par une majuscule et ne contenir que des lettres (prénoms composés autorisés avec - )"
+        firstNameErrorMsg.innerText = "Votre prénom doit commencer par une majuscule et ne contenir que des lettres (prénoms composés autorisés avec - , chaque prénom commençant par une majuscule exemple: Louis-Gabriel)"
       }
     }
   })
