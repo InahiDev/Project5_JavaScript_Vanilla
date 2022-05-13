@@ -276,11 +276,13 @@ manageCart()
 //---------------------------------------------------------------------//
 const formContact = document.querySelector('form.cart__order__form')
 
-const nameRegex = /([A-Z]{1}[a-zéèàç]+){1,}([\S\-\1])*/
-const nameRegex2 = /^([A-Z]{1}([a-zéèàçù][\D])*\b){1,}([\S\-]{1}(([A-Z]{1}([a-zéèàçù][\D])+))*\b)*$/
-const nameRegex3 = /^([A-Z]{1}[a-zéèàç]+){1}\b(([\D][\S\-\1]))*$/
-const nameRegex4 = /^([A-Z]{1}[a-zéèàçù-]+){1}\b$/
-const nameRegex5 = /^(([A-Z]{1}([a-zâäëéèàùçï]+))([-][A-Z]{1}([a-zâäëéèàùçï]+))*){1}$/
+const firstNameRegex = /([A-Z]{1}[a-zéèàç]+){1,}([\S\-\1])*/
+const firstNameRegex2 = /^([A-Z]{1}([a-zéèàçù][\D])*\b){1,}([\S\-]{1}(([A-Z]{1}([a-zéèàçù][\D])+))*\b)*$/
+const firstNameRegex3 = /^([A-Z]{1}[a-zéèàç]+){1}\b(([\D][\S\-\1]))*$/
+const firstNameRegex4 = /^([A-Z]{1}[a-zéèàçù-]+){1}\b$/
+const firstNameRegex5 = /^(([A-Z]{1}([a-zâäëéèàùçï]+))([-][A-Z]{1}([a-zâäëéèàùçï]+))*){1}$/
+
+const lastNameRegex = /^(([A-Z]{1}([a-zâäëéèàùçï]+))([ -][A-Z]{1}([a-zâäëéèàùçï]+))*){1}$/
 
 const addressRegex = /([0-9]{1,4})\ {1}([^\t\n\r][a-zéèàçùA-Z0-9\s\-\,\.]+)$/
 
@@ -294,8 +296,12 @@ const emailRegex2 = /(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|
 //--------------------Validation par les Regex--------------------------//
 //----------------------------------------------------------------------//
 
-function isValidAlphabetical(inputValue) {
-  return nameRegex5.test(inputValue)
+function isValidAlphabeticalFirstName(inputValue) {
+  return firstNameRegex5.test(inputValue)
+}
+
+function isValidAlphabeticalLastName(inputValue) {
+  return lastNameRegex.test(inputValue)
 }
 
 function isValidAddress(inputValue) {
@@ -317,7 +323,7 @@ function isValidEmail(inputValue) {
 //Vérification de l'input Prénom. Si incorrect, retourne "undefined"
 function verifyFirstName() {
   let firstNameInput = document.getElementById('firstName')
-  if (isValidAlphabetical(firstNameInput.value)) {
+  if (isValidAlphabeticalFirstName(firstNameInput.value)) {
     return firstNameInput.value
   } else {
     return undefined
@@ -335,7 +341,7 @@ function firstNameEventListener() {
       }
     } else {
       if (firstNameErrorMsg.innerText === "") {
-        firstNameErrorMsg.innerText = "Votre prénom doit commencer par une majuscule et ne contenir que des lettres (prénoms composés autorisés avec - , chaque prénom commençant par une majuscule exemple: Louis-Gabriel)"
+        firstNameErrorMsg.innerText = "Votre prénom doit commencer par une majuscule et ne contenir que des lettres (prénoms composés autorisés avec - , chaque prénom commençant par une majuscule exemple: Prénom-Composé)"
       }
     }
   })
@@ -344,7 +350,7 @@ function firstNameEventListener() {
 //Vérification de l'input Nom. Si incorrect return "undefined"
 function verifyLastName() {
   let lastNameInput = document.getElementById('lastName')
-  if (isValidAlphabetical(lastNameInput.value)) {
+  if (isValidAlphabeticalLastName(lastNameInput.value)) {
     return lastNameInput.value
   } else {
     return undefined
@@ -362,7 +368,7 @@ function lastNameEventListener() {
       }
     } else {
       if(lastNameErrorMsg.innerText === "") {
-        lastNameErrorMsg.innerText = "Votre nom de famille doit commencer par une majuscule (noms composés autorisés)"
+        lastNameErrorMsg.innerText = "Votre nom de famille doit commencer par une majuscule (noms composés autorisés avec - ou un espace, chaque nom commençant par une majuscule exemple : Nom-De-Famille, Nom De Famille)"
       }
     }
   })
