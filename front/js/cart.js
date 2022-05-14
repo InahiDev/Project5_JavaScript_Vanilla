@@ -129,28 +129,32 @@ function removeMsgIfExist(parent, cssSelector) {
   }
 }
 
-//Récupération des infos du cart et des infos produits de l'API, comparaison croisée pour créer un unique article par couleur
+//Récupération des infos de l'API pour chaque element d'un talbeau d'ids
+async function getProductFromArray(idsProducts) {
+  await idsProducts.forEach(id => getProductFromId(id))
+}
+
+
+//Création d'un tableau des couleurs commandées pour chaque id
+async function callCreateArticleForEachColor(id, idArray, colorsArray) {
+  let productFromDB = await getProductFromId(id)
+  let idIndex = idArray.indexOf(id)
+  for (let colors of colorsArray) {
+    let colorIndex = colorsArray.indexOf(colors)
+    if (idIndex === colorIndex) {
+      colors.forEach(productOrdered => createProductArticle(productFromDB, productOrdered.color, productOrdered.quantity))
+    }
+  }
+}
+
+//Récupération des infos du cart, et appel de createArticleForEachColor
 async function createArticlesFromCart() {
   if (window.localStorage.getItem('cart')) {
     let cart = JSON.parse(window.localStorage.getItem('cart'))    //Récupération des infos du cart
     let idsProducts = Object.getOwnPropertyNames(cart)  //Récupération des ids stockées dans le cart
     let colorsInCart = Object.values(cart)  //Récupération des couleurs sélectionnées et stockées
     for (let id of idsProducts) {
-      let idIndex = idsProducts.indexOf(id) //Premier index de comparaison
-      let product = await getProductFromId(id)  //Récupération des infos de l'API pour remplir les articles
-      let colorsAvailable = product.colors  
-      for (let colorsOrdered of colorsInCart) {
-        let colorIndex = colorsInCart.indexOf(colorsOrdered) //Second index de comparaison
-        if (colorIndex == idIndex) {  //Il s'agit bien du même produit dans les deux tableaux
-          for (let colorOrdered of colorsOrdered) {
-            for (let colorAvailable of colorsAvailable) {
-              if (colorOrdered.color == colorAvailable) { //La couleur dans la fiche produit a été retrouvée dans le cart => création d'un <article>
-                createProductArticle(product, colorOrdered.color, colorOrdered.quantity)
-              }
-            }
-          }
-        }
-      }
+      await callCreateArticleForEachColor(id, idsProducts, colorsInCart)
     }
   }
 }
