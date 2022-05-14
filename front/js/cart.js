@@ -128,7 +128,7 @@ function createDivQuantity(quantity) {
 function createDivDelete() {
   //let newDivDelete = createNewFlowElement("div", "cart__item__content__settings__delete")
   let newPDelete = createNewFlowElement("p", undefined, "Supprimer")
-  let newDivDelete = gatherElementsInNewParent("div", "cart_item__content__settings__delete", newPDelete)
+  let newDivDelete = gatherElementsInNewParent("div", "cart__item__content__settings__delete", newPDelete)
   //newDivDelete.appendChild(newPDelete)
   return newDivDelete
 }
@@ -222,8 +222,10 @@ async function getTotalPrice() {
 //Suppression de l'article en appuyant sur le <p>Supprimer</p>
 function deleteArticle() {
   let deleteButtons = section.querySelectorAll('.cart__item__content__settings__delete > p')
+  console.log(deleteButtons)
   for (let deleteButton of deleteButtons) {
     deleteButton.addEventListener('click', () => {
+      console.log('jai entendu le click')
       let articleTargetDelete = deleteButton.closest('article.cart__item')
       let idArticleTarget = articleTargetDelete.getAttribute('data-id')
       let colorArticleTarget = articleTargetDelete.getAttribute('data-color')
@@ -278,6 +280,7 @@ function verifyQuantity(quantityInput) {
 //Monitoring des changements de valeurs des inputs quantité
 function changeQuantity() {
   let quantityInputs = section.querySelectorAll('.cart__item__content__settings__quantity > input')
+  console.log(quantityInputs)
   for (let quantityInput of quantityInputs) {
     quantityInput.addEventListener('change', () => {
       verifyQuantity(quantityInput)
