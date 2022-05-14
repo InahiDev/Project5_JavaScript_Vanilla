@@ -59,60 +59,102 @@ function createNewInput(type, cssClass, name, value = 0, min = 1, max = 100, id 
   return newInput
 }
 
+//Regroupement de plusieurs éléments (jusqu'à 3) dans un parent
+function gatherElementsInNewParent(tagParent, cssSelector, elementOne, elementTwo, elementThree) {
+  let parent = createNewFlowElement(tagParent, cssSelector)
+  if (elementOne != undefined) {
+    parent.appendChild(elementOne)
+  }
+  if (elementTwo != undefined){
+    parent.appendChild(elementTwo)
+  }
+  if (elementThree != undefined) {
+    parent.appendChild(elementThree)
+  }
+  return parent
+}
+
+//Regroupement de plusieurs éléments (jusqu'à 4) dans un parent préexistant
+function gatherElementsInExistingParent(parent, elementOne, elementTwo, elementThree, elementFour) {
+  if (elementOne != undefined) {
+    parent.appendChild(elementOne)
+  }
+  if (elementTwo != undefined) {
+    parent.appendChild(elementTwo)
+  }
+  if (elementThree != undefined) {
+    parent.appendChild(elementThree)
+  }
+  if (elementFour != undefined) {
+    parent.appendChild(elementFour)
+  }
+  return parent
+}
+
 //Création de la div container de Img pour l'article du cart
 function createDivImg(product) {
-  let newDivImg = createNewFlowElement("div", "cart__item__img")
+  //let newDivImg = createNewFlowElement("div", "cart__item__img")
   let newImg = createNewImage(product.imageUrl, product.altTxt)
-  newDivImg.appendChild(newImg)
+  let newDivImg = gatherElementsInNewParent("div", "cart__item__img", newImg)
+  //newDivImg.appendChild(newImg)
   return newDivImg
 }
 
 //Création de la div Description pour l'article du cart
 function createDivDescription(product, color) {
-  let newDivDescription = createNewFlowElement("div", "cart__item__content__description")
+  //let newDivDescription = createNewFlowElement("div", "cart__item__content__description")
   let newName = createNewFlowElement("h2", undefined, product.name)
   let newColor = createNewFlowElement("p", undefined, color)
   let newPrice = createNewFlowElement("p", undefined, `${product.price/100}€`)
-  newDivDescription.appendChild(newName)
-  newDivDescription.appendChild(newColor)
-  newDivDescription.appendChild(newPrice)
+  let newDivDescription = gatherElementsInNewParent("div", "cart__item__content__description", newName, newColor, newPrice)
+  //newDivDescription.appendChild(newName)
+  //newDivDescription.appendChild(newColor)
+  //newDivDescription.appendChild(newPrice)
   return newDivDescription
 }
 
 //Création de la div Quantity pour l'article du cart
 function createDivQuantity(quantity) {
-  let newDivQuantity = createNewFlowElement("div", "cart__item__content__settings__quantity")
+  //let newDivQuantity = createNewFlowElement("div", "cart__item__content__settings__quantity")
   let newPQuantity = createNewFlowElement("p", undefined, "Qté : ")
   let newInputQuantity = createNewInput("number", "itemQuantity", "itemQuantity", quantity)
-  newDivQuantity.appendChild(newPQuantity)
-  newDivQuantity.appendChild(newInputQuantity)
+  let newDivQuantity = gatherElementsInNewParent("div", "cart__item__content__settings__quantity", newPQuantity, newInputQuantity)
+  //newDivQuantity.appendChild(newPQuantity)
+  //newDivQuantity.appendChild(newInputQuantity)
   return newDivQuantity
 }
 
 //Création de la div Delete pour l'article du cart
 function createDivDelete() {
-  let newDivDelete = createNewFlowElement("div", "cart__item__content__settings__delete")
+  //let newDivDelete = createNewFlowElement("div", "cart__item__content__settings__delete")
   let newPDelete = createNewFlowElement("p", undefined, "Supprimer")
-  newDivDelete.appendChild(newPDelete)
+  let newDivDelete = gatherElementsInNewParent("div", "cart_item__content__settings__delete", newPDelete)
+  //newDivDelete.appendChild(newPDelete)
   return newDivDelete
 }
+
+
+
 
 //Création de l'article du cart
 function createProductArticle(product, color, quantity) {
   let newArticle = createNewArticle("cart__item", product._id, color)
   let newDivImg = createDivImg(product)
-  let newDivContent = createNewFlowElement("div", "cart__item__content")
+  //let newDivContent = createNewFlowElement("div", "cart__item__content")
   let newDivDescription = createDivDescription(product, color)
-  let newDivSettings = createNewFlowElement("div", "cart__item__content__settings")
+  //let newDivSettings = createNewFlowElement("div", "cart__item__content__settings")
   let newDivQuantity = createDivQuantity(quantity)
   let newDivDelete = createDivDelete()
-  newDivSettings.appendChild(newDivQuantity)
-  newDivSettings.appendChild(newDivDelete)
-  newDivContent.appendChild(newDivDescription)
-  newDivContent.appendChild(newDivSettings)
-  newArticle.appendChild(newDivImg)
-  newArticle.appendChild(newDivContent)
-  section.appendChild(newArticle)
+  let newDivSettings = gatherElementsInNewParent("div", "cart__item__content__settings", newDivQuantity, newDivDelete)
+  let newDivContent = gatherElementsInNewParent("div", "cart__item__content", newDivDescription, newDivSettings)
+  let newArticleFilled = gatherElementsInExistingParent(newArticle, newDivImg, newDivContent)
+  //newDivSettings.appendChild(newDivQuantity)
+  //newDivSettings.appendChild(newDivDelete)
+  //newDivContent.appendChild(newDivDescription)
+  //newDivContent.appendChild(newDivSettings)
+  //newArticle.appendChild(newDivImg)
+  //newArticle.appendChild(newDivContent)
+  section.appendChild(newArticleFilled)
 }
 
 //Ajout d'un message d'erreur s'il n'existe pas déjà
@@ -129,19 +171,13 @@ function removeMsgIfExist(parent, cssSelector) {
   }
 }
 
-//Récupération des infos de l'API pour chaque element d'un talbeau d'ids
-async function getProductFromArray(idsProducts) {
-  await idsProducts.forEach(id => getProductFromId(id))
-}
-
-
-//Création d'un tableau des couleurs commandées pour chaque id
+//Sélection du tableau de couleur d'une id présente dans un tableau d'ids, puis appel de createProductArticle pour chaque entrée de ce tableau de couleur
 async function callCreateArticleForEachColor(id, idArray, colorsArray) {
   let productFromDB = await getProductFromId(id)
   let idIndex = idArray.indexOf(id)
   for (let colors of colorsArray) {
     let colorIndex = colorsArray.indexOf(colors)
-    if (idIndex === colorIndex) {
+    if (idIndex === colorIndex) { //Ids correspondantes => Colors ne contient que les couleurs d'une seule id
       colors.forEach(productOrdered => createProductArticle(productFromDB, productOrdered.color, productOrdered.quantity))
     }
   }
@@ -247,7 +283,7 @@ function changeQuantity() {
       verifyQuantity(quantityInput)
       getTotalPrice() //Recalcul à chaque modification
       getTotalQuantity()  //Recalcul à chaque modification
-      if (quantityInput.value >= 1 || quantityInput.value <= 100) {
+      if (quantityInput.value >= 1 && quantityInput.value <= 100) {
         let articleTargetChange = quantityInput.closest('article.cart__item')
         let idArticleTarget = articleTargetChange.getAttribute('data-id')
         let colorArticleTarget = articleTargetChange.getAttribute('data-color')
@@ -278,7 +314,8 @@ manageCart()
 //---------------------------------------------------------------------//
 //----------------------------Regex------------------------------------//
 //---------------------------------------------------------------------//
-const formContact = document.querySelector('form.cart__order__form')
+
+//const formContact = document.querySelector('form.cart__order__form')
 
 const firstNameRegex = /([A-Z]{1}[a-zéèàç]+){1,}([\S\-\1])*/
 const firstNameRegex2 = /^([A-Z]{1}([a-zéèàçù][\D])*\b){1,}([\S\-]{1}(([A-Z]{1}([a-zéèàçù][\D])+))*\b)*$/
@@ -339,7 +376,7 @@ function firstNameEventListener() {
   let firstNameInput = document.getElementById('firstName')
   let firstNameErrorMsg = document.getElementById('firstNameErrorMsg')
   firstNameInput.addEventListener("change", () => { //EventListener pour affichage du message d'erreur et correction
-    if (isValidAlphabetical(firstNameInput.value)) {
+    if (isValidAlphabeticalFirstName(firstNameInput.value)) {
       if (firstNameErrorMsg.innerText !== "") {
         firstNameErrorMsg.innerText = ""
       }
@@ -366,7 +403,7 @@ function lastNameEventListener() {
   let lastNameInput = document.getElementById('lastName')
   let lastNameErrorMsg = document.getElementById('lastNameErrorMsg')
   lastNameInput.addEventListener("change", () => {  //EventListener pour affichage du message d'erreur et correction
-    if (isValidAlphabetical(lastNameInput.value)) {
+    if (isValidAlphabeticalLastName(lastNameInput.value)) {
       if (lastNameErrorMsg.innerText !== "") {
         lastNameErrorMsg.innerText = ""
       }
