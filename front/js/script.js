@@ -7,20 +7,67 @@ async function getProductsArray() {
 
 const section = document.querySelector('section.items') //Facilitation d'écriture pour plus tard en sélectionnant la section à remplir
 
+//Regroupement de plusieurs éléments (jusqu'à 3) dans un parent
+function gatherElementsInNewParent(tagParent, cssSelector, elementOne, elementTwo, elementThree) {
+  let parent = createNewFlowElement(tagParent, cssSelector)
+  if (elementOne != undefined) {
+    parent.appendChild(elementOne)
+  }
+  if (elementTwo != undefined){
+    parent.appendChild(elementTwo)
+  }
+  if (elementThree != undefined) {
+    parent.appendChild(elementThree)
+  }
+  return parent
+}
+
+//Création d'un <a></a> sans texte (<a> englobant une card par exemple)
+function createNewLink(href, linkText = "") {
+  let newLink = document.createElement("a")
+  newLink.href = href
+  if (linkText != "") {newLink.innerText = linkText}
+  return newLink
+}
+
+//Création d'un <article> spécifique possédant les attributs data-id & data-color
+function createNewArticle(cssClass = "", dataId = "", dataColor = "") {
+  let newArticle = document.createElement("article")
+  if (cssClass != "") {newArticle.classList.add(cssClass)}
+  if (dataId != "") {newArticle.setAttribute('data-id', `${dataId}`)}
+  if (dataColor != "") {newArticle.setAttribute('data-color', `${dataColor}`)}
+  return newArticle
+}
+
+//Création d'un élément (div / span / p / h / section / article)
+function createNewFlowElement(tagName, cssClass= "", textToInsert = "", id = "") {
+  let newFlowElement = document.createElement(tagName)
+  if (cssClass != "") {newFlowElement.classList.add(cssClass)}
+  if (textToInsert != "") {newFlowElement.innerText = textToInsert}
+  if (id != "") {newFlowElement.id = id}
+  return newFlowElement
+}
+
 //Création d'une card (<a>-><article>->(<img>-<h3>-<p>)
 function createNewProductArticle() {
-    let newLink = document.createElement('a')
-    let newArticle = document.createElement('article')
-    let newImage = document.createElement('img')
-    let newTitle = document.createElement('h3')
-    newTitle.classList.add("class", "productName")
-    let newP = document.createElement('p')
-    newP.classList.add("class", "productDescription")
-    newArticle.appendChild(newImage)
-    newArticle.appendChild(newTitle)
-    newArticle.appendChild(newP)
-    newLink.appendChild(newArticle)
-    section.appendChild(newLink)
+  //let newLink = createNewFlowElement(a)
+  //let newLink = document.createElement('a')
+  //let newArticle = createNewFlowElement(article)
+  //let newArticle = document.createElement('article')
+  let newImage = document.createElement('img')
+  let newTitle = createNewFlowElement("h3", "productName")
+  //let newTitle = document.createElement('h3')
+  //newTitle.classList.add("class", "productName")
+  let newP = createNewFlowElement("p", "productDescription")
+  //let newP = document.createElement('p')
+  //newP.classList.add("class", "productDescription")
+  let newArticle = gatherElementsInNewParent("article", undefined, newImage, newTitle, newP)
+  //newArticle.appendChild(newImage)
+  //newArticle.appendChild(newTitle)
+  //newArticle.appendChild(newP)
+  let newLink = gatherElementsInNewParent("a", undefined, newArticle)
+  //newLink.appendChild(newArticle)
+  section.appendChild(newLink)
 }
 
 //Fonction permmettant de modifier chaque href en fonction de l'id présent au niveau de l'article (reflétant l'idProduit)
@@ -29,12 +76,12 @@ function createUrlParamsRequest(link) {
 }
 
 //Depuis un Array, créer une nouvelle card pour chaque élément de l'array. Utilisation des informations contenu dans les objets de l'array pour remplir les cards.
-function createProductOverview(index = 0, array) {
+function createProductOverview(index = 0, array = []) {
   const product = array[index]  //Définition intrinsèque des paramètres de la fonction
   const indexSelector = index + 1  //Décalage de l'index pour création du sélecteur CSS
   createNewProductArticle()
   const newLink = section.querySelector(`a:nth-child(${indexSelector})`)
-  newLink.id = product._id  //Correspondance idProduit avec idA (idCard)
+  newLink.id = product._id  //Définition de l'idCard idProduit depuis le tableau donné en paramètre
   createUrlParamsRequest(newLink) //Modification des href personnalisée pour chaque card
   const parentA = document.getElementById(product._id)
   parentA.querySelector('img').src = product.imageUrl  //Remplissage des attributs src et alt des img
@@ -46,9 +93,10 @@ function createProductOverview(index = 0, array) {
 //Récupération du tableau des produits et création d'une card remplie pour chaque élément du tableau
 async function createProductsOverviews() {
   let products = await getProductsArray()  //Récupération du tableau de produits depuis l'API (verbe "GET" sans paramètre)
-  for (let elem of products) {  //Création d'une card pour chaque produit à chaque itération de la boucle
-    createProductOverview(products.indexOf(elem), products)
-  }
+  products.forEach(elem => createProductOverview(products.indexOf(elem), products))
+  //for (let elem of products) {  //Création d'une card pour chaque produit à chaque itération de la boucle
+  //  createProductOverview(products.indexOf(elem), products)
+  //}
 }
 
 createProductsOverviews()
