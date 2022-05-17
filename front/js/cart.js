@@ -21,20 +21,20 @@ function createNewImage(src, alt) {
 }
 
 //Création d'un élément (div / span / p / h / section / article)
-function createNewFlowElement(tagName, cssClass= "", textToInsert = "", id = "") {
+function createNewFlowElement(tagName, cssClass, textToInsert, id) {
   let newFlowElement = document.createElement(tagName)
-  if (cssClass != "") {newFlowElement.classList.add(cssClass)}
-  if (textToInsert != "") {newFlowElement.innerText = textToInsert}
-  if (id != "") {newFlowElement.id = id}
+  if (cssClass) {newFlowElement.classList.add(cssClass)}
+  if (textToInsert) {newFlowElement.innerText = textToInsert}
+  if (id) {newFlowElement.id = id}
   return newFlowElement
 }
 
 //Création d'un <article> spécifique possédant les attributs data-id & data-color
-function createNewArticle(cssClass = "", dataId = "", dataColor = "") {
+function createNewArticle(cssClass, dataId, dataColor) {
   let newArticle = document.createElement("article")
-  if (cssClass != "") {newArticle.classList.add(cssClass)}
-  if (dataId != "") {newArticle.setAttribute('data-id', `${dataId}`)}
-  if (dataColor != "") {newArticle.setAttribute('data-color', `${dataColor}`)}
+  if (cssClass) {newArticle.classList.add(cssClass)}
+  if (dataId) {newArticle.setAttribute('data-id', `${dataId}`)}
+  if (dataColor) {newArticle.setAttribute('data-color', `${dataColor}`)}
   return newArticle
 }
 
@@ -46,21 +46,21 @@ function createNewLink(href) {
 }
 
 //Création d'<input> 
-function createNewInput(type, cssClass, name, value = 0, min = 1, max = 100, id = "") {
+function createNewInput(type, cssClass, name, value = 0, min = 1, max = 100, id) {
   let newInput = document.createElement("input")
   newInput.type = type
   newInput.setAttribute("value", value)
   newInput.value = value
   newInput.min = min
   newInput.max = max
-  if (id != undefined) {newInput.id = id}
-  if (cssClass != undefined) {newInput.classList.add(cssClass)}
-  if (name != undefined) {newInput.name = name}
+  if (id) {newInput.id = id}
+  if (cssClass) {newInput.classList.add(cssClass)}
+  if (name) {newInput.name = name}
   return newInput
 }
 
-//Regroupement de plusieurs éléments (jusqu'à 3) dans un parent
-function gatherElementsInNewParent(tagParent, cssSelector, array) {
+//Regroupement de plusieurs éléments dans un parent à créer
+function gatherElementsInNewParent(tagParent, array, cssSelector) {
   let parent = createNewFlowElement(tagParent, cssSelector)
   for (let element of array) {
     if (element) {
@@ -70,7 +70,7 @@ function gatherElementsInNewParent(tagParent, cssSelector, array) {
   return parent
 }
 
-//Regroupement de plusieurs éléments (jusqu'à 4) dans un parent préexistant
+//Regroupement de plusieurs éléments dans un parent préexistant
 function gatherElementsInExistingParent(parent, array) {
   for (let element of array) {
     if (element) {
@@ -83,7 +83,7 @@ function gatherElementsInExistingParent(parent, array) {
 //Création de la div container de Img pour l'article du cart
 function createDivImg(product) {
   let newImg = createNewImage(product.imageUrl, product.altTxt)
-  let newDivImg = gatherElementsInNewParent("div", "cart__item__img", [newImg])
+  let newDivImg = gatherElementsInNewParent("div", [newImg], "cart__item__img")
   return newDivImg
 }
 
@@ -92,7 +92,7 @@ function createDivDescription(product, color) {
   let newName = createNewFlowElement("h2", undefined, product.name)
   let newColor = createNewFlowElement("p", undefined, color)
   let newPrice = createNewFlowElement("p", undefined, `${product.price/100}€`)
-  let newDivDescription = gatherElementsInNewParent("div", "cart__item__content__description", [newName, newColor, newPrice])
+  let newDivDescription = gatherElementsInNewParent("div", [newName, newColor, newPrice], "cart__item__content__description")
   return newDivDescription
 }
 
@@ -100,14 +100,14 @@ function createDivDescription(product, color) {
 function createDivQuantity(quantity) {
   let newPQuantity = createNewFlowElement("p", undefined, "Qté : ")
   let newInputQuantity = createNewInput("number", "itemQuantity", "itemQuantity", quantity)
-  let newDivQuantity = gatherElementsInNewParent("div", "cart__item__content__settings__quantity", [newPQuantity, newInputQuantity])
+  let newDivQuantity = gatherElementsInNewParent("div", [newPQuantity, newInputQuantity], "cart__item__content__settings__quantity")
   return newDivQuantity
 }
 
 //Création de la div Delete pour l'article du cart
 function createDivDelete() {
   let newPDelete = createNewFlowElement("p", undefined, "Supprimer")
-  let newDivDelete = gatherElementsInNewParent("div", "cart__item__content__settings__delete", [newPDelete])
+  let newDivDelete = gatherElementsInNewParent("div", [newPDelete], "cart__item__content__settings__delete")
   return newDivDelete
 }
 
@@ -121,8 +121,8 @@ function createProductArticle(product, color, quantity) {
   let newDivDescription = createDivDescription(product, color)
   let newDivQuantity = createDivQuantity(quantity)
   let newDivDelete = createDivDelete()
-  let newDivSettings = gatherElementsInNewParent("div", "cart__item__content__settings", [newDivQuantity, newDivDelete])
-  let newDivContent = gatherElementsInNewParent("div", "cart__item__content", [newDivDescription, newDivSettings])
+  let newDivSettings = gatherElementsInNewParent("div", [newDivQuantity, newDivDelete], "cart__item__content__settings")
+  let newDivContent = gatherElementsInNewParent("div", [newDivDescription, newDivSettings], "cart__item__content")
   let newArticleFilled = gatherElementsInExistingParent(newArticle, [newDivImg, newDivContent])
   section.appendChild(newArticleFilled)
 }

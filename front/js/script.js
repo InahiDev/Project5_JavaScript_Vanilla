@@ -7,8 +7,8 @@ async function getProductsArray() {
 
 const section = document.querySelector('section.items') //Facilitation d'écriture pour plus tard en sélectionnant la section à remplir
 
-//Regroupement de plusieurs éléments (jusqu'à 3) dans un parent
-function gatherElementsInNewParent(tagParent, cssSelector, array) {
+//Regroupement de plusieurs éléments dans un parent
+function gatherElementsInNewParent(tagParent, array, cssSelector) {
   let parent = createNewFlowElement(tagParent, cssSelector)
   for (let element of array) {
     if (element) {
@@ -27,20 +27,20 @@ function createNewLink(href, linkText = "") {
 }
 
 //Création d'un <article> spécifique possédant les attributs data-id & data-color
-function createNewArticle(cssClass = "", dataId = "", dataColor = "") {
+function createNewArticle(cssClass, dataId, dataColor) {
   let newArticle = document.createElement("article")
-  if (cssClass != "") {newArticle.classList.add(cssClass)}
-  if (dataId != "") {newArticle.setAttribute('data-id', `${dataId}`)}
-  if (dataColor != "") {newArticle.setAttribute('data-color', `${dataColor}`)}
+  if (cssClass) {newArticle.classList.add(cssClass)}
+  if (dataId) {newArticle.setAttribute('data-id', `${dataId}`)}
+  if (dataColor) {newArticle.setAttribute('data-color', `${dataColor}`)}
   return newArticle
 }
 
 //Création d'un élément (div / span / p / h / section / article)
-function createNewFlowElement(tagName, cssClass= "", textToInsert = "", id = "") {
+function createNewFlowElement(tagName, cssClass, textToInsert, id) {
   let newFlowElement = document.createElement(tagName)
-  if (cssClass != "") {newFlowElement.classList.add(cssClass)}
-  if (textToInsert != "") {newFlowElement.innerText = textToInsert}
-  if (id != "") {newFlowElement.id = id}
+  if (cssClass) {newFlowElement.classList.add(cssClass)}
+  if (textToInsert) {newFlowElement.innerText = textToInsert}
+  if (id) {newFlowElement.id = id}
   return newFlowElement
 }
 
@@ -49,8 +49,8 @@ function createNewProductArticle() {
   let newImage = document.createElement('img')
   let newTitle = createNewFlowElement("h3", "productName")
   let newP = createNewFlowElement("p", "productDescription") 
-  let newArticle = gatherElementsInNewParent("article", undefined, [newImage, newTitle, newP])
-  let newLink = gatherElementsInNewParent("a", undefined, [newArticle])
+  let newArticle = gatherElementsInNewParent("article", [newImage, newTitle, newP])
+  let newLink = gatherElementsInNewParent("a", [newArticle])
   section.appendChild(newLink)
 }
 
