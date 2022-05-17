@@ -8,16 +8,12 @@ async function getProductsArray() {
 const section = document.querySelector('section.items') //Facilitation d'écriture pour plus tard en sélectionnant la section à remplir
 
 //Regroupement de plusieurs éléments (jusqu'à 3) dans un parent
-function gatherElementsInNewParent(tagParent, cssSelector, elementOne, elementTwo, elementThree) {
+function gatherElementsInNewParent(tagParent, cssSelector, array) {
   let parent = createNewFlowElement(tagParent, cssSelector)
-  if (elementOne != undefined) {
-    parent.appendChild(elementOne)
-  }
-  if (elementTwo != undefined){
-    parent.appendChild(elementTwo)
-  }
-  if (elementThree != undefined) {
-    parent.appendChild(elementThree)
+  for (let element of array) {
+    if (element) {
+      parent.appendChild(element)
+    }
   }
   return parent
 }
@@ -50,23 +46,11 @@ function createNewFlowElement(tagName, cssClass= "", textToInsert = "", id = "")
 
 //Création d'une card (<a>-><article>->(<img>-<h3>-<p>)
 function createNewProductArticle() {
-  //let newLink = createNewFlowElement(a)
-  //let newLink = document.createElement('a')
-  //let newArticle = createNewFlowElement(article)
-  //let newArticle = document.createElement('article')
   let newImage = document.createElement('img')
   let newTitle = createNewFlowElement("h3", "productName")
-  //let newTitle = document.createElement('h3')
-  //newTitle.classList.add("class", "productName")
-  let newP = createNewFlowElement("p", "productDescription")
-  //let newP = document.createElement('p')
-  //newP.classList.add("class", "productDescription")
-  let newArticle = gatherElementsInNewParent("article", undefined, newImage, newTitle, newP)
-  //newArticle.appendChild(newImage)
-  //newArticle.appendChild(newTitle)
-  //newArticle.appendChild(newP)
-  let newLink = gatherElementsInNewParent("a", undefined, newArticle)
-  //newLink.appendChild(newArticle)
+  let newP = createNewFlowElement("p", "productDescription") 
+  let newArticle = gatherElementsInNewParent("article", undefined, [newImage, newTitle, newP])
+  let newLink = gatherElementsInNewParent("a", undefined, [newArticle])
   section.appendChild(newLink)
 }
 

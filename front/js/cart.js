@@ -60,76 +60,54 @@ function createNewInput(type, cssClass, name, value = 0, min = 1, max = 100, id 
 }
 
 //Regroupement de plusieurs éléments (jusqu'à 3) dans un parent
-function gatherElementsInNewParent(tagParent, cssSelector, elementOne, elementTwo, elementThree) {
+function gatherElementsInNewParent(tagParent, cssSelector, array) {
   let parent = createNewFlowElement(tagParent, cssSelector)
-  if (elementOne != undefined) {
-    parent.appendChild(elementOne)
-  }
-  if (elementTwo != undefined){
-    parent.appendChild(elementTwo)
-  }
-  if (elementThree != undefined) {
-    parent.appendChild(elementThree)
+  for (let element of array) {
+    if (element) {
+      parent.appendChild(element)
+    }
   }
   return parent
 }
 
 //Regroupement de plusieurs éléments (jusqu'à 4) dans un parent préexistant
-function gatherElementsInExistingParent(parent, elementOne, elementTwo, elementThree, elementFour) {
-  if (elementOne != undefined) {
-    parent.appendChild(elementOne)
-  }
-  if (elementTwo != undefined) {
-    parent.appendChild(elementTwo)
-  }
-  if (elementThree != undefined) {
-    parent.appendChild(elementThree)
-  }
-  if (elementFour != undefined) {
-    parent.appendChild(elementFour)
+function gatherElementsInExistingParent(parent, array) {
+  for (let element of array) {
+    if (element) {
+      parent.appendChild(element)
+    }
   }
   return parent
 }
 
 //Création de la div container de Img pour l'article du cart
 function createDivImg(product) {
-  //let newDivImg = createNewFlowElement("div", "cart__item__img")
   let newImg = createNewImage(product.imageUrl, product.altTxt)
-  let newDivImg = gatherElementsInNewParent("div", "cart__item__img", newImg)
-  //newDivImg.appendChild(newImg)
+  let newDivImg = gatherElementsInNewParent("div", "cart__item__img", [newImg])
   return newDivImg
 }
 
 //Création de la div Description pour l'article du cart
 function createDivDescription(product, color) {
-  //let newDivDescription = createNewFlowElement("div", "cart__item__content__description")
   let newName = createNewFlowElement("h2", undefined, product.name)
   let newColor = createNewFlowElement("p", undefined, color)
   let newPrice = createNewFlowElement("p", undefined, `${product.price/100}€`)
-  let newDivDescription = gatherElementsInNewParent("div", "cart__item__content__description", newName, newColor, newPrice)
-  //newDivDescription.appendChild(newName)
-  //newDivDescription.appendChild(newColor)
-  //newDivDescription.appendChild(newPrice)
+  let newDivDescription = gatherElementsInNewParent("div", "cart__item__content__description", [newName, newColor, newPrice])
   return newDivDescription
 }
 
 //Création de la div Quantity pour l'article du cart
 function createDivQuantity(quantity) {
-  //let newDivQuantity = createNewFlowElement("div", "cart__item__content__settings__quantity")
   let newPQuantity = createNewFlowElement("p", undefined, "Qté : ")
   let newInputQuantity = createNewInput("number", "itemQuantity", "itemQuantity", quantity)
-  let newDivQuantity = gatherElementsInNewParent("div", "cart__item__content__settings__quantity", newPQuantity, newInputQuantity)
-  //newDivQuantity.appendChild(newPQuantity)
-  //newDivQuantity.appendChild(newInputQuantity)
+  let newDivQuantity = gatherElementsInNewParent("div", "cart__item__content__settings__quantity", [newPQuantity, newInputQuantity])
   return newDivQuantity
 }
 
 //Création de la div Delete pour l'article du cart
 function createDivDelete() {
-  //let newDivDelete = createNewFlowElement("div", "cart__item__content__settings__delete")
   let newPDelete = createNewFlowElement("p", undefined, "Supprimer")
-  let newDivDelete = gatherElementsInNewParent("div", "cart__item__content__settings__delete", newPDelete)
-  //newDivDelete.appendChild(newPDelete)
+  let newDivDelete = gatherElementsInNewParent("div", "cart__item__content__settings__delete", [newPDelete])
   return newDivDelete
 }
 
@@ -140,34 +118,26 @@ function createDivDelete() {
 function createProductArticle(product, color, quantity) {
   let newArticle = createNewArticle("cart__item", product._id, color)
   let newDivImg = createDivImg(product)
-  //let newDivContent = createNewFlowElement("div", "cart__item__content")
   let newDivDescription = createDivDescription(product, color)
-  //let newDivSettings = createNewFlowElement("div", "cart__item__content__settings")
   let newDivQuantity = createDivQuantity(quantity)
   let newDivDelete = createDivDelete()
-  let newDivSettings = gatherElementsInNewParent("div", "cart__item__content__settings", newDivQuantity, newDivDelete)
-  let newDivContent = gatherElementsInNewParent("div", "cart__item__content", newDivDescription, newDivSettings)
-  let newArticleFilled = gatherElementsInExistingParent(newArticle, newDivImg, newDivContent)
-  //newDivSettings.appendChild(newDivQuantity)
-  //newDivSettings.appendChild(newDivDelete)
-  //newDivContent.appendChild(newDivDescription)
-  //newDivContent.appendChild(newDivSettings)
-  //newArticle.appendChild(newDivImg)
-  //newArticle.appendChild(newDivContent)
+  let newDivSettings = gatherElementsInNewParent("div", "cart__item__content__settings", [newDivQuantity, newDivDelete])
+  let newDivContent = gatherElementsInNewParent("div", "cart__item__content", [newDivDescription, newDivSettings])
+  let newArticleFilled = gatherElementsInExistingParent(newArticle, [newDivImg, newDivContent])
   section.appendChild(newArticleFilled)
 }
 
 //Ajout d'un message d'erreur s'il n'existe pas déjà
-function appendMsgIfDontExist(parent, child, cssSelector) {
-  if (!parent.querySelector(cssSelector)) {
+function appendMsgIfDontExist(parent, child, childCssSelector) {
+  if (!parent.querySelector(childCssSelector)) {
     parent.appendChild(child)
   }
 }
 
 //Suppression d'un message d'erreur si correction
-function removeMsgIfExist(parent, cssSelector) {
-  if(parent.querySelector(cssSelector)) {
-    parent.removeChild(parent.querySelector(cssSelector))
+function removeMsgIfExist(parent, childCssSelector) {
+  if(parent.querySelector(childCssSelector)) {
+    parent.removeChild(parent.querySelector(childCssSelector))
   }
 }
 
@@ -184,16 +154,14 @@ async function callCreateArticleForEachColor(id, idArray, colorsArray) {
 }
 
 //Récupération des infos du cart, et appel de createArticleForEachColor
-async function createArticlesFromCart() {
-  if (window.localStorage.getItem('cart')) {
-    let cart = JSON.parse(window.localStorage.getItem('cart'))    //Récupération des infos du cart
-    let idsProducts = Object.getOwnPropertyNames(cart)  //Récupération des ids stockées dans le cart
-    let colorsInCart = Object.values(cart)  //Récupération des couleurs sélectionnées et stockées
-    for (let id of idsProducts) {
-      await callCreateArticleForEachColor(id, idsProducts, colorsInCart)
-    }
+async function createArticlesFromCart(cart) {
+  let idsProducts = Object.getOwnPropertyNames(cart)  //Récupération des ids stockées dans le cart
+  let colorsInCart = Object.values(cart)  //Récupération des couleurs sélectionnées et stockées
+  for (let id of idsProducts) {
+    await callCreateArticleForEachColor(id, idsProducts, colorsInCart)
   }
 }
+
 
 //Récupération de toutes les values des itemQuantity
 function getTotalQuantity() {
@@ -220,16 +188,13 @@ async function getTotalPrice() {
 }
 
 //Suppression de l'article en appuyant sur le <p>Supprimer</p>
-function deleteArticle() {
+function deleteArticle(cart) {
   let deleteButtons = section.querySelectorAll('.cart__item__content__settings__delete > p')
-  console.log(deleteButtons)
   for (let deleteButton of deleteButtons) {
     deleteButton.addEventListener('click', () => {
-      console.log('jai entendu le click')
       let articleTargetDelete = deleteButton.closest('article.cart__item')
       let idArticleTarget = articleTargetDelete.getAttribute('data-id')
       let colorArticleTarget = articleTargetDelete.getAttribute('data-color')
-      let cart = JSON.parse(window.localStorage.getItem('cart'))
       let productsTargetDelete = cart[idArticleTarget]
       for (let productTargetDelete of productsTargetDelete) {
         if (productTargetDelete.color == colorArticleTarget) {
@@ -278,19 +243,17 @@ function verifyQuantity(quantityInput) {
 }
 
 //Monitoring des changements de valeurs des inputs quantité
-function changeQuantity() {
+function changeQuantity(cart) {
   let quantityInputs = section.querySelectorAll('.cart__item__content__settings__quantity > input')
-  console.log(quantityInputs)
   for (let quantityInput of quantityInputs) {
     quantityInput.addEventListener('change', () => {
       verifyQuantity(quantityInput)
       getTotalPrice() //Recalcul à chaque modification
       getTotalQuantity()  //Recalcul à chaque modification
-      if (quantityInput.value >= 1 && quantityInput.value <= 100) {
+      if (quantityInput.value >= 1 && quantityInput.value <= 100) { //input.value correcte
         let articleTargetChange = quantityInput.closest('article.cart__item')
         let idArticleTarget = articleTargetChange.getAttribute('data-id')
         let colorArticleTarget = articleTargetChange.getAttribute('data-color')
-        let cart = JSON.parse(window.localStorage.getItem('cart'))
         let productsTargetChange = cart[idArticleTarget]
         for (let productTargetChange of productsTargetChange) {
           if (productTargetChange.color == colorArticleTarget) {
@@ -304,16 +267,18 @@ function changeQuantity() {
 }
 
 //Fonction de gestion du cart, créant le cart, faisant les deux totaux et gérant la suppression ou la modification
-async function manageCart() {
-  await createArticlesFromCart()
+async function manageCart(cart) {
+  await createArticlesFromCart(cart)
   getTotalQuantity()
   getTotalPrice()
-  deleteArticle()
-  changeQuantity()
+  deleteArticle(cart)
+  changeQuantity(cart)
 }
 
-manageCart()
-
+if (window.localStorage.getItem('cart')) {
+  let cart = JSON.parse(window.localStorage.getItem('cart'))
+  manageCart(cart)
+}
 //---------------------------------------------------------------------//
 //----------------------------Regex------------------------------------//
 //---------------------------------------------------------------------//
@@ -511,9 +476,9 @@ addressEventListener()
 cityEventListener()
 emailEventListener()
 
-//-------------------------------------------------------------------//
-//------------Création de l'objet pour méthode "POST"----------------//
-//-------------------------------------------------------------------//
+//-------------------------------------------------------------------------//
+//---------------Création de l'objet pour méthode "POST"-------------------//
+//-------------------------------------------------------------------------//
 
 //Création du tableau products pour la méthode "POST"
 function getOrder() {
