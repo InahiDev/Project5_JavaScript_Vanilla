@@ -162,7 +162,7 @@ function verifyQuantity() {
 //Comparaison des couleurs présentes dans le cart (incluse dans l'array), à la couleur de l'input actuellement sélectionnée (colorToFind)
 function isColorInCart(array, colorToFind) {
   for (let object of array) {
-    if(object.color == colorToFind) {
+    if(object.color === colorToFind) {
       return true
     }
   }
@@ -184,8 +184,6 @@ function removeOverHundredMessage() {
   removeMsgIfExist(itemContent, "p.overHundred")
 }
 
-let inputsErrorMsg = document.querySelector('p.inputsError')
-
 //Affichage et gestion d'un message d'erreur concernant les inputs avant ajout au cart
 function displayErrorMessageForCartChange() {
   const button = document.getElementById('addToCart')
@@ -193,16 +191,12 @@ function displayErrorMessageForCartChange() {
     let colorSelected = verifyColor()
     let quantitySelected = verifyQuantity() 
       if ((colorSelected && quantitySelected) !== undefined) {
-        if (document.querySelector('p.inputsError')) {
-          document.querySelector('div.item__content').removeChild(document.querySelector('p.inputsError'))
-        }
+        removeMsgIfExist(document.querySelector('div.item__content'), "p.inputsError")
       } else {
         const inputsErrorMsgContent = "Veuillez vérifier la couleur et la quantité sélectionnées"
         let inputsErrorMsg = createNewFlowElement("p", "inputsError", inputsErrorMsgContent)
         inputsErrorMsg.setAttribute('style', 'text-align: center')
-          if (!document.querySelector('.item__content > p.inputsError')) {
-            document.querySelector('.item__content').appendChild(inputsErrorMsg)
-          }
+        appendMsgIfDontExist(document.querySelector('.item__content'), inputsErrorMsg, '.item__content > p.inputsError')
       }
   })
 }
@@ -210,52 +204,85 @@ function displayErrorMessageForCartChange() {
 //Appel de l'EventListener message d'erreur
 displayErrorMessageForCartChange()
 
-//Création du cart dans le localStorage lors de l'appui sur "Ajouter au panier"
+//Création du cart
+function createCart(colorSelected, quantitySelected) {
+  let cart = {}
+  cart[id] = []
+  addNewColorToArray(cart[id], colorSelected, quantitySelected)
+  removeOverHundredMessage()
+  window.localStorage.setItem('cart', JSON.stringify(cart))
+}
+
+//Ajout d'une propriété (un idProduct) au cart
+function addNewIdToExistingCart (cart, colorSelected, quantitySelected) {
+  cart[id] = []
+  addNewColorToArray(cart[id], colorSelected, quantitySelected)
+  removeOverHundredMessage()
+  window.localStorage.setItem('cart', JSON.stringify(cart))
+}
+
+//Ajout nouvelle couleur à la propriété idProduct trouvée dans le cart
+function addNewColorToExistingIdInCart(cart, colorSelected, quantitySelected) {
+  removeOverHundredMessage()
+  addNewColorToArray(cart[id], colorSelected, quantitySelected)
+  window.localStorage.setItem('cart', JSON.stringify(cart))
+}
+
+//Affichage d'un message si l'on dépasse 100 dans le cart
+function displayOverHundredMessage() {
+  const itemContent = document.querySelector('div.item__content')
+    const overHundredErrorMsgContent = "Vous avez ajouté le nombre maximum d'exemplaire de cet article au panier!"
+    let overHundredErrorMsg = createNewFlowElement("p", "overHundred", overHundredErrorMsgContent)
+    overHundredErrorMsg.setAttribute('style', 'text-align: center')
+    appendMsgIfDontExist(itemContent, overHundredErrorMsg, "p.overHundred") 
+}
+
+//Maximisation de la quantité commandable à 100
+function maxCommandQuantityAndStoreIt(cart, quantityInCart, targetObject) {
+  if (quantityInCart > 100) {
+    targetObject.quantity = 100
+    window.localStorage.setItem('cart', JSON.stringify(cart))
+    displayOverHundredMessage()
+  } else {
+    removeOverHundredMessage()
+    window.localStorage.setItem('cart', JSON.stringify(cart))
+  }
+}
+
+
+//Création du cart dans le localStorage lors de l'appui sur "Ajouter au panier", Modification s'il existe déjà
 function createCommandProductInLocalStorage() {
   const button = document.getElementById('addToCart')  
   button.addEventListener('click', () => {
     let colorSelected = verifyColor()
     let quantitySelected = verifyQuantity()
-      if ((colorSelected && quantitySelected) !== undefined) {  //Création ou modification seulement si les inputs sont valides
-        if (!window.localStorage.getItem('cart')) { //Le cart n'existe pas
-          let cart = {}
-          cart[id] = []
-          addNewColorToArray(cart[id], colorSelected, quantitySelected)
-          removeOverHundredMessage()
-          window.localStorage.setItem('cart', JSON.stringify(cart))
+    if ((colorSelected && quantitySelected) !== undefined) {  //Création ou modification seulement si les inputs sont valides
+      if (!window.localStorage.getItem('cart')) { //Le cart n'existe pas
+        createCart(colorSelected, quantitySelected)
       } else {
-          let cart = JSON.parse(window.localStorage.getItem('cart'))  //Récupérer le cart
-            if (!cart.hasOwnProperty(id)) { //Le cart ne contient pas de produit dont l'idProduct correspond
-              cart[id] = []
-              addNewColorToArray(cart[id], colorSelected, quantitySelected)
-              removeOverHundredMessage()
-              window.localStorage.setItem('cart', JSON.stringify(cart))
-          } else {
-              let products = cart[id] //Récupérer le tableau correspondant à l'idProduct
-              if (isColorInCart(products, colorSelected)) { //Comparaison des couleurs déjà présentes dans le cart à la couleur actuellement sélectionnée
-                for (let product of products) {
-                  if (product.color === colorSelected) {  //Trouver l'objet ayant la bonne couleur dans le tableau
-                    product.quantity = product.quantity + quantitySelected
-                      if (product.quantity > 100) { //Gestion du cas où la quantité dans le cart dépasserait la quantité maximale pouvant être commandée
-                        product.quantity = 100
-                        window.localStorage.setItem('cart', JSON.stringify(cart))
-                        const itemContent = document.querySelector('div.item__content')
-                        const overHundredErrorMsgContent = "Vous avez ajouté le nombre maximum d'exemplaire de cet article au panier!"
-                        let overHundredErrorMsg = createNewFlowElement("p", "overHundred", overHundredErrorMsgContent)
-                        overHundredErrorMsg.setAttribute('style', 'text-align: center')
-                        appendMsgIfDontExist(itemContent, overHundredErrorMsg, "p.overHundred") 
-                    } else {
-                        removeOverHundredMessage() 
-                        window.localStorage.setItem('cart', JSON.stringify(cart))
-                    }
+        let cart = JSON.parse(window.localStorage.getItem('cart'))  //Récupérer le cart
+          if (!cart.hasOwnProperty(id)) { //Le cart ne contient pas de produit dont l'idProduct correspond
+            addNewIdToExistingCart(cart, colorSelected, quantitySelected)
+        } else {
+            let products = cart[id] //Récupérer le tableau d'objets correspondant à l'idProduct
+            if (isColorInCart(products, colorSelected)) { //Comparaison des couleurs déjà présentes dans le cart à la couleur actuellement sélectionnée
+              for (let product of products) {
+                if (product.color === colorSelected) {  //Sélectionner l'objet dont la couleur correspond dans le tableau d'objets
+                  product.quantity = product.quantity + quantitySelected
+                  if (product.quantity > 100) { //Gestion du cas où la quantité dans le cart dépasserait la quantité maximale pouvant être commandée
+                    product.quantity = 100
+                    window.localStorage.setItem('cart', JSON.stringify(cart))
+                    displayOverHundredMessage() 
+                  } else {
+                    removeOverHundredMessage() 
+                    window.localStorage.setItem('cart', JSON.stringify(cart))
                   }
                 }
-            } else {  //La couleur n'était pas dans le cart
-                removeOverHundredMessage()
-                addNewColorToArray(cart[id], colorSelected, quantitySelected)
-                window.localStorage.setItem('cart', JSON.stringify(cart))
-            }
-          }    
+              }
+          } else {  //La couleur du produit déja présent n'était pas dans le cart
+            addNewColorToExistingIdInCart(cart, colorSelected, quantitySelected)
+          }
+        }    
       }
     }
   })

@@ -19,10 +19,10 @@ function gatherElementsInNewParent(tagParent, array, cssSelector) {
 }
 
 //Création d'un <a></a> sans texte (<a> englobant une card par exemple)
-function createNewLink(href, linkText = "") {
+function createNewLink(href, linkText) {
   let newLink = document.createElement("a")
   newLink.href = href
-  if (linkText != "") {newLink.innerText = linkText}
+  if (linkText) {newLink.innerText = linkText}
   return newLink
 }
 
@@ -78,9 +78,6 @@ function createProductOverview(index = 0, array = []) {
 async function createProductsOverviews() {
   let products = await getProductsArray()  //Récupération du tableau de produits depuis l'API (verbe "GET" sans paramètre)
   products.forEach(elem => createProductOverview(products.indexOf(elem), products))
-  //for (let elem of products) {  //Création d'une card pour chaque produit à chaque itération de la boucle
-  //  createProductOverview(products.indexOf(elem), products)
-  //}
 }
 
 createProductsOverviews()

@@ -256,8 +256,8 @@ function changeQuantity(cart) {
         let colorArticleTarget = articleTargetChange.getAttribute('data-color')
         let productsTargetChange = cart[idArticleTarget]
         for (let productTargetChange of productsTargetChange) {
-          if (productTargetChange.color == colorArticleTarget) {
-            productTargetChange.quantity = quantityInput.value
+          if (productTargetChange.color === colorArticleTarget) {
+            productTargetChange.quantity = Number(quantityInput.value)
             window.localStorage.setItem('cart', JSON.stringify(cart))
           }
         }
