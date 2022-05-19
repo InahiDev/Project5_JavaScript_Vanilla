@@ -237,19 +237,6 @@ function displayOverHundredMessage() {
     appendMsgIfDontExist(itemContent, overHundredErrorMsg, "p.overHundred") 
 }
 
-//Maximisation de la quantité commandable à 100
-function maxCommandQuantityAndStoreIt(cart, quantityInCart, targetObject) {
-  if (quantityInCart > 100) {
-    targetObject.quantity = 100
-    window.localStorage.setItem('cart', JSON.stringify(cart))
-    displayOverHundredMessage()
-  } else {
-    removeOverHundredMessage()
-    window.localStorage.setItem('cart', JSON.stringify(cart))
-  }
-}
-
-
 //Création du cart dans le localStorage lors de l'appui sur "Ajouter au panier", Modification s'il existe déjà
 function createCommandProductInLocalStorage() {
   const button = document.getElementById('addToCart')  
@@ -267,7 +254,7 @@ function createCommandProductInLocalStorage() {
             let products = cart[id] //Récupérer le tableau d'objets correspondant à l'idProduct
             if (isColorInCart(products, colorSelected)) { //Comparaison des couleurs déjà présentes dans le cart à la couleur actuellement sélectionnée
               for (let product of products) {
-                if (product.color === colorSelected) {  //Sélectionner l'objet dont la couleur correspond dans le tableau d'objets
+                if (product.color === colorSelected) {  //Sélection de l'objet dont la couleur correspond dans le tableau d'objets
                   product.quantity = product.quantity + quantitySelected
                   if (product.quantity > 100) { //Gestion du cas où la quantité dans le cart dépasserait la quantité maximale pouvant être commandée
                     product.quantity = 100
