@@ -106,26 +106,27 @@ function quantityEventListener() {
   const quantity = document.getElementById('quantity')
   const quantityErrorMsg = createNewFlowElement("p", "quantityErrorMsg")
   quantity.addEventListener('change', () => {  //EventListener traitant les divers cas de valeurs saisies
-    if (quantity.value == Number.isNaN(quantity.value)&& quantity.value != "0") {  //Une lettre ou le cas 0 isNaN
+    let qty = quantity.value
+    if (qty == Number.isNaN(qty) && qty != "0") {  //Une lettre ou le cas 0 isNaN
       resetInputValueAttribute(quantity)
       const notANumberMsg = "Veuillez entrer un nombre s'il vous plait"
       quantityErrorMsg.innerText = notANumberMsg
       appendMsgIfDontExist(quantity.parentNode, quantityErrorMsg, "p.quantityErrorMsg")
       document.querySelector('p.quantityErrorMsg').innerText = notANumberMsg 
-    } else if(quantity.value == "0" || Number(quantity.value) < 1) {
+    } else if(qty == "0" || Number(qty) < 1) {
       resetInputValueAttribute(quantity)
       const lessThanZeroMsg = "La quantité minimale à ajouter au panier est de un (1)"
       quantityErrorMsg.innerText = lessThanZeroMsg
       appendMsgIfDontExist(quantity.parentNode, quantityErrorMsg, "p.quantityErrorMsg")
       document.querySelector('p.quantityErrorMsg').innerText = lessThanZeroMsg
-    } else if (Number(quantity.value) > 100) {
+    } else if (Number(qty) > 100) {
       resetInputValueAttribute(quantity)
       const moreThanHundredMsg = "La quantité maximale est de cent (100)"
       quantityErrorMsg.innerText = moreThanHundredMsg
       appendMsgIfDontExist(quantity.parentNode, quantityErrorMsg, "p.quantityErrorMsg")
       document.querySelector('p.quantityErrorMsg').innerText = moreThanHundredMsg
-    } else if ((Number(quantity.value) >= 1) && (Number(quantity.value) <= 100)) {
-      quantity.setAttribute('value', `${quantity.value}`)
+    } else if ((Number(qty) >= 1) && (Number(qty) <= 100)) {
+      quantity.setAttribute('value', `${qty}`)
       removeMsgIfExist(quantity.parentNode, "p.quantityErrorMsg")
     }
   })
@@ -237,6 +238,31 @@ function displayOverHundredMessage() {
     appendMsgIfDontExist(itemContent, overHundredErrorMsg, "p.overHundred") 
 }
 
+
+function findProduct(array, colorToFind) {
+  let result = null
+  for (let object of array) {
+    if (object.color === colorToFind) {
+      result = object
+      break
+    }
+  }
+  return result
+}
+
+//Modifier la quantité d'un produit dont la couleur existe déjà dans le cart, la maximiser à 100 si l'ajout fait dépasser
+function modifyQtyInCart(product, quantitySelected, cart) {
+  product.quantity = product.quantity + quantitySelected
+  if (product.quantity > 100) { //Gestion du cas où la quantité dans le cart dépasserait la quantité maximale pouvant être commandée
+    product.quantity = 100
+    window.localStorage.setItem('cart', JSON.stringify(cart))
+    displayOverHundredMessage() 
+  } else {
+    removeOverHundredMessage() 
+    window.localStorage.setItem('cart', JSON.stringify(cart))
+  }
+}
+
 //Création du cart dans le localStorage lors de l'appui sur "Ajouter au panier", Modification s'il existe déjà
 function createCommandProductInLocalStorage() {
   const button = document.getElementById('addToCart')  
@@ -250,25 +276,14 @@ function createCommandProductInLocalStorage() {
         let cart = JSON.parse(window.localStorage.getItem('cart'))  //Récupérer le cart
           if (!cart.hasOwnProperty(id)) { //Le cart ne contient pas de produit dont l'idProduct correspond
             addNewIdToExistingCart(cart, colorSelected, quantitySelected)
-        } else {
+          } else {
             let products = cart[id] //Récupérer le tableau d'objets correspondant à l'idProduct
             if (isColorInCart(products, colorSelected)) { //Comparaison des couleurs déjà présentes dans le cart à la couleur actuellement sélectionnée
-              for (let product of products) {
-                if (product.color === colorSelected) {  //Sélection de l'objet dont la couleur correspond dans le tableau d'objets
-                  product.quantity = product.quantity + quantitySelected
-                  if (product.quantity > 100) { //Gestion du cas où la quantité dans le cart dépasserait la quantité maximale pouvant être commandée
-                    product.quantity = 100
-                    window.localStorage.setItem('cart', JSON.stringify(cart))
-                    displayOverHundredMessage() 
-                  } else {
-                    removeOverHundredMessage() 
-                    window.localStorage.setItem('cart', JSON.stringify(cart))
-                  }
-                }
-              }
-          } else {  //La couleur du produit déja présent n'était pas dans le cart
+              let product = findProduct(products, colorSelected)
+              modifyQtyInCart(product, quantitySelected, cart)
+            } else {  //La couleur du produit déja présent n'était pas dans le cart
             addNewColorToExistingIdInCart(cart, colorSelected, quantitySelected)
-          }
+            }
         }    
       }
     }

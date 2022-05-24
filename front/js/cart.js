@@ -148,7 +148,9 @@ async function callCreateArticleForEachColor(id, idArray, colorsArray) {
   for (let colors of colorsArray) {
     let colorIndex = colorsArray.indexOf(colors)
     if (idIndex === colorIndex) { //Ids correspondantes => Colors ne contient que les couleurs d'une seule id
-      colors.forEach(productOrdered => createProductArticle(productFromDB, productOrdered.color, productOrdered.quantity))
+      for (let productOrdered of colors) {
+        createProductArticle(productFromDB, productOrdered.color, productOrdered.quantity)
+      }
     }
   }
 }
@@ -187,26 +189,30 @@ async function getTotalPrice() {
   }
 }
 
+function deleteProduct(cart, deleteButton) {
+  let article = deleteButton.closest('article.cart__item')
+  let id = article.getAttribute('data-id')
+  let color = article.getAttribute('data-color')
+  let products = cart[id]
+  for (let product of products) {
+    if (product.color === color) {
+      let index = products.indexOf(product)
+      products.splice(index, 1)
+      if (products.length == 0) { //Cas où la suppression entraîne la suppression de la dernière couleur du produit
+        delete cart[`${id}`]
+      }
+      window.localStorage.setItem('cart', JSON.stringify(cart))
+      article.parentNode.removeChild(article)
+    }
+  }
+}
+
 //Suppression de l'article en appuyant sur le <p>Supprimer</p>
-function deleteArticle(cart) {
+function addDeleteFunction(cart) {
   let deleteButtons = section.querySelectorAll('.cart__item__content__settings__delete > p')
   for (let deleteButton of deleteButtons) {
     deleteButton.addEventListener('click', () => {
-      let articleTargetDelete = deleteButton.closest('article.cart__item')
-      let idArticleTarget = articleTargetDelete.getAttribute('data-id')
-      let colorArticleTarget = articleTargetDelete.getAttribute('data-color')
-      let productsTargetDelete = cart[idArticleTarget]
-      for (let productTargetDelete of productsTargetDelete) {
-        if (productTargetDelete.color == colorArticleTarget) {
-          let indexOfTargetDelete = productsTargetDelete.indexOf(productTargetDelete)
-          productsTargetDelete.splice(indexOfTargetDelete, 1)
-          if (productsTargetDelete.length == 0) { //Cas où la suppression entraîne la suppression de la dernière couleur du produit
-            delete cart[`${idArticleTarget}`]
-          }
-          window.localStorage.setItem('cart', JSON.stringify(cart))
-          articleTargetDelete.parentNode.removeChild(articleTargetDelete)
-        }
-      }
+      deleteProduct(cart, deleteButton)
       getTotalPrice() //Recalcul à chaque suppression
       getTotalQuantity()  //Recalcul à chaque suppression
     })
@@ -271,7 +277,7 @@ async function manageCart(cart) {
   await createArticlesFromCart(cart)
   getTotalQuantity()
   getTotalPrice()
-  deleteArticle(cart)
+  addDeleteFunction(cart)
   changeQuantity(cart)
 }
 
